@@ -72,7 +72,7 @@ const WL=[['Dog','Eating spaghetti','Sleeping','Swimming','Brushing teeth','Cat'
 const GM=[['dp','🎨','Doodle Chain','Write something, draw it, guess it, pass it on. Gartic Phone style.'],['ml','👆','Most Likely To','Vote on who fits the prompt. You see who voted for who.'],['im','🕵️','Imposter','Same secret word for everyone except one bluffer. Send one-word clues, then vote them out.'],['qb','😂','Quip Battle','Everyone answers a daft prompt, then votes for the funniest.'],['sd','🥷','Dare Duty','One person at a time. Camera goes live on your turn, everyone judges. 8 levels, up to Mythic.'],['ch','🎭','Live Charades','Act a secret word on live camera, no talking. Everyone else types guesses. Gets harder every round.'],['pp','🎡','Punishment Roulette','Everyone writes punishments. Quick contests find the loser, who does a random one on live camera.'],['sf','🗿','Stone Face','Keep a straight face on live camera while the class types and draws their own ridiculous stuff onto your screen. Spot the crack to score. Silent, so it works in class.']];
 let L={};try{L=JSON.parse(localStorage.hop)||{}}catch(e){}
 let me=L.n?{n:L.n,e:L.e}:null,tmp={n:L.n||'',e:L.e||EM[0]},peer,conns={},host=false,hc,id,S={p:[]},T=null,W=null,B=[],IM={},OR=[],SP=[],LS=null,VS=null,CALLED={},CALLS=[],seen={},HT=0,U={},PV={},GEN=0,RT=0,tries=0,last=0,room='',rcn=0,q=[],cs=-1,cd=-1,uid=(()=>{try{return sessionStorage.hopuid||(sessionStorage.hopuid='u'+Math.random().toString(36).slice(2,10))}catch(e){return'u'+Math.random().toString(36).slice(2,10)}})(),shown=-1,qs=-1,qd=-1,myA='',QA={},QO=[],QPool=[],err='',col=COL[0];
-let CT=-1,CERR='',CW='',CP=[],GK=-1,PP=[],SUBS={},CS={t:-1},PPT=0,PQ=[],SFT=0,SFA={},SFV={t:-1,at:0},SFN='',SFDW=-1;
+let CT=-1,CERR='',CW='',CP=[],GK=-1,PP=[],SUBS={},CS={t:-1},PPT=0,PQ=[],SFT=0,SFA={},SFV={t:-1,at:0},SFN='',SFDW=-1,OPENING=0,OT=0,BAN={};
 const R0=(()=>{try{return sessionStorage.hoproom||''}catch(e){return''}})();
 const Q0=(new URLSearchParams(location.search).get('room')||'').slice(0,4);
 const N=()=>S.p.length,pName=i=>{const p=S.p.find(p=>p.id===i);return p?p.e+' '+esc(p.n):'?'};
@@ -86,12 +86,13 @@ function send(to,m){if(to!==id&&(m.t==='task'||m.t==='word'))(PV[to]=PV[to]||{})
 function act(m){host?handle(id,m):hc&&hc.open?hc.send(m):q.push(m)}
 function recv(m){
  if(m.t==='hb')return;
+ if(m.t==='ban')return fail('The host removed you from that room.');
  if(m.t==='x')return fail('That game’s already running. Wait for the next one.');
  if(m.t==='S'){S=m.s;if(S.g!=='dp')T=null;if(!S.g)W=null;if(S.g!=='qb')qd=-1;if(S.g!=='im')cd=-1;if(S.g==='qb'&&S.ph==='ans'&&qd!==S.r)myA=''}
  else{if(m.t==='task')T=m;if(m.t==='word')W=m}
  render();
 }
-function fail(m){err=m;GEN++;clearInterval(HT);clearTimeout(RT);RT=0;rcn=0;room='';try{sessionStorage.removeItem('hoproom')}catch(e){}try{peer.destroy()}catch(e){}peer=null;hc=null;conns={};host=false;S={p:[]};T=W=null;shown=-1;qs=qd=cs=cd=-1;render()}
+function fail(m){OPENING=0;err=m;GEN++;clearInterval(HT);clearTimeout(RT);RT=0;rcn=0;room='';try{sessionStorage.removeItem('hoproom')}catch(e){}try{peer.destroy()}catch(e){}peer=null;hc=null;conns={};host=false;S={p:[]};T=W=null;shown=-1;qs=qd=cs=cd=-1;render()}
 const H0=f=>f===id;
 function ensureHost(){if(me&&!S.p.some(p=>p.id===id))S.p.unshift({id,n:me.n,e:me.e,s:0,sk:2,st:0,pi:id})}
 function drop(i){try{conns[i]&&conns[i].close()}catch(e){}delete conns[i];if(!S.p.some(p=>p.id===i))return;S.p=S.p.filter(p=>p.id!==i);
@@ -102,21 +103,21 @@ function drop(i){try{conns[i]&&conns[i].close()}catch(e){}delete conns[i];if(!S.
  if(S.g){S.g=null;S.ph='lobby';ensureHost()}bcast()}
 const wake=()=>{try{navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)return;wake();if(host&&peer&&peer.disconnected)try{peer.reconnect()}catch(e){}if(!host&&room){if(!hc||!hc.open){clearTimeout(RT);RT=0;link()}else hc.send({t:'hb'})}});
-function startHost(){
- wake();const code=rc();host=true;peer=new Peer(PID(code));peer.on('call',onCall);
- peer.on('open',i=>{id=i;S={g:null,ph:'lobby',c:code,cam:1,p:[{id,n:me.n,e:me.e,s:0,sk:2,st:0,pi:id}]};render();HT=setInterval(()=>{const t=Date.now();let ch=0;for(const k in conns)conns[k].open&&conns[k].send({t:'hb'});S.p.forEach(p=>{if(p.id===id)return;const idle=t-(seen[p.id]||t),z=idle>10000?1:0;if((p.z||0)!==z){p.z=z;ch=1}if(idle>120000)drop(p.id)});if(ch)bcast()},4000)});
+function startHost(c0){
+ wake();const code=c0||rc();host=true;peer=new Peer(PID(code));peer.on('call',onCall);
+ peer.on('open',i=>{id=i;OPENING=0;S={g:null,ph:'lobby',c:code,cam:1,p:[{id,n:me.n,e:me.e,s:0,sk:2,st:0,pi:id}]};render();HT=setInterval(()=>{const t=Date.now();let ch=0;for(const k in conns)conns[k].open&&conns[k].send({t:'hb'});S.p.forEach(p=>{if(p.id===id)return;const idle=t-(seen[p.id]||t),z=idle>10000?1:0;if((p.z||0)!==z){p.z=z;ch=1}if(idle>120000)drop(p.id)});if(ch)bcast()},4000)});
  peer.on('connection',c=>c.on('data',m=>{if(m.t==='join'){U[c.peer]=m.u?String(m.u).slice(0,24):c.peer;conns[U[c.peer]]=c;m.pi=c.peer}const f=U[c.peer];if(f)handle(f,m)}));
- peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();startHost()}else fail('Connection dropped ('+e.type+'). Try again.')});
+ peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();if(c0){host=false;peer=null;if(++OT>4)return fail('The open room is busy. Try again.');setTimeout(()=>{if(!peer&&!host&&me)join(c0)},600)}else startHost()}else fail('Connection dropped ('+e.type+'). Try again.')});
 }
 function join(c){room=c.toUpperCase();tries=0;wake();link()}
 function link(){
  const g=++GEN;clearInterval(HT);try{peer&&peer.destroy()}catch(e){}
  peer=new Peer();peer.on('call',onCall);
  peer.on('open',()=>{if(g!==GEN)return;id=uid;hc=peer.connect(PID(room),{reliable:true});
-  hc.on('open',()=>{if(g!==GEN)return;tries=0;rcn=0;last=Date.now();hc.send({t:'join',n:me.n,e:me.e,u:uid});while(q.length)hc.send(q.shift());HT=setInterval(()=>{hc.open&&hc.send({t:'hb'});if(!document.hidden&&Date.now()-last>15000)reco()},3000);try{sessionStorage.hoproom=room}catch(e){}if(S.p.length)render()});
+  hc.on('open',()=>{if(g!==GEN)return;OPENING=0;tries=0;rcn=0;last=Date.now();hc.send({t:'join',n:me.n,e:me.e,u:uid});while(q.length)hc.send(q.shift());HT=setInterval(()=>{hc.open&&hc.send({t:'hb'});if(!document.hidden&&Date.now()-last>15000)reco()},3000);try{sessionStorage.hoproom=room}catch(e){}if(S.p.length)render()});
   hc.on('data',m=>{if(g===GEN){last=Date.now();recv(m)}});
   hc.on('close',()=>{if(g===GEN)reco()})});
- peer.on('error',e=>{if(g!==GEN)return;if(!S.p.length)fail(e.type==='peer-unavailable'?'Can’t find that room. Check the code.':'Connection dropped ('+e.type+'). Try again.');else reco()});
+ peer.on('error',e=>{if(g!==GEN)return;if(OPENING&&!S.p.length&&e.type==='peer-unavailable'){GEN++;try{peer.destroy()}catch(x){}peer=null;hc=null;room='';if(++OT>4)return fail('Couldn’t open the room. Try again.');return startHost('OPEN')}if(!S.p.length)fail(e.type==='peer-unavailable'?'Can’t find that room. Check the code.':'Connection dropped ('+e.type+'). Try again.');else reco()});
 }
 function reco(){if(host||RT||!room)return;rcn=1;render();RT=setTimeout(()=>{RT=0;if(++tries>20)return fail('Lost the connection. Try joining again.');link()},2500)}
 
@@ -124,9 +125,9 @@ function reco(){if(host||RT||!room)return;rcn=1;render();RT=setTimeout(()=>{RT=0
 function handle(f,m){
  seen[f]=Date.now();
  if(m.t==='hb')return;
- if(H0(f)&&m.t==='kick'&&m.i!==f)return drop(m.i);
+ if(H0(f)&&m.t==='kick'&&m.i!==f){if(m.b)BAN[m.i]=1;return drop(m.i)}
  if(H0(f)&&m.t==='camset'){S.cam=S.cam?0:1;if(!S.cam)S.live=0;return bcast()}
- if(m.t==='join'){const q0=S.p.find(p=>p.id===f);if(q0){q0.pi=m.pi;Object.values(PV[f]||{}).forEach(x=>send(f,x));return bcast()}if(S.g&&S.g!=='sd'&&S.g!=='ch'&&S.g!=='pp'&&S.g!=='sf')return send(f,{t:'x'});if(!S.p.some(p=>p.id===f)){S.p.push({id:f,n:String(m.n).slice(0,12),e:EM.includes(m.e)?m.e:'🙂',s:0,sk:2,st:0,pi:m.pi});if(S.g==='sd'||S.g==='ch'||S.g==='sf')OR.push(f);if(S.g==='sf'&&S.am)S.am[f]=3}return bcast()}
+ if(m.t==='join'){if(BAN[f])return send(f,{t:'ban'});const q0=S.p.find(p=>p.id===f);if(q0){q0.pi=m.pi;Object.values(PV[f]||{}).forEach(x=>send(f,x));return bcast()}if(S.g&&S.g!=='sd'&&S.g!=='ch'&&S.g!=='pp'&&S.g!=='sf')return send(f,{t:'x'});if(!S.p.some(p=>p.id===f)){S.p.push({id:f,n:String(m.n).slice(0,12),e:EM.includes(m.e)?m.e:'🙂',s:0,sk:2,st:0,pi:m.pi});if(S.g==='sd'||S.g==='ch'||S.g==='sf')OR.push(f);if(S.g==='sf'&&S.am)S.am[f]=3}return bcast()}
  const G=S.g,H=f===id;
  if(H&&m.t==='go'&&!G&&N()>=3)return start(m.g);
  if(H&&m.t==='home'){clearTimeout(SFT);ensureHost();S.g=null;S.ph='lobby';return bcast()}
@@ -295,8 +296,8 @@ function imRes(){const c=tal(),mx=Math.max(...Object.values(c)),top=Object.keys(
 
 /* ---------- views ---------- */
 function vSign(){return `<h1>Hop In 🎈</h1><p>Party games for you and your mates. Free, and there’s no app to download.</p><div class=card><h3>Who are you?</h3><input id=nm maxlength=12 placeholder="Your name" value="${esc(tmp.n)}"><div class=row style="margin:8px 0">${EM.map(e=>`<button class="e ${e===tmp.e?'on':''}" data-a=em data-e="${e}">${e}</button>`).join('')}</div><button class=r data-a=signin>Right, let’s go</button></div>`}
-function vHome(){return `<h1>Hop In 🎈</h1>`+(peer?'<p>Connecting…</p>':`<div class=card>${chip(me)}<button data-a=out style="width:auto;display:inline-block;padding:3px 10px;font-size:14px;box-shadow:none">not you?</button><button class=r data-a=host>Start a room</button><h3>Got a code?</h3><input id=cd maxlength=4 value="${esc(Q0)}" placeholder="CODE" style="text-align:center;letter-spacing:8px;text-transform:uppercase"><button class=t data-a=join>Join</button><button data-a=scan>📷 Scan a QR code</button></div>`+(err?`<div class=card>${esc(err)}</div>`:''))}
-function vLobby(){return `<h2>Room ${S.c}</h2><div class=card style="text-align:center"><div class=big>${S.c}</div><div id=qr style="display:inline-block;padding:8px;background:#fff;margin-top:10px"></div><br><small>Scan this, or type the code in at ${esc(location.host)}</small></div><div class=card><h3>Players (${N()})</h3>${S.p.map(chip).join('')}</div>`+
+function vHome(){return `<h1>Hop In 🎈</h1>`+(peer||OPENING?'<p>Connecting…</p>':`<div class=card>${chip(me)}<button data-a=out style="width:auto;display:inline-block;padding:3px 10px;font-size:14px;box-shadow:none">not you?</button><button class=r data-a=host>Start a room</button><h3>Got a code?</h3><input id=cd maxlength=4 value="${esc(Q0)}" placeholder="CODE" style="text-align:center;letter-spacing:8px;text-transform:uppercase"><button class=t data-a=join>Join</button><button data-a=scan>📷 Scan a QR code</button><button class=r data-a=open>🌍 Join the open room</button><small>No code needed. Anyone on the site can hop in, so it’s good for mixing classes. Cameras go live to everyone in the room.</small></div>`+(err?`<div class=card>${esc(err)}</div>`:''))}
+function vLobby(){return `<h2>${S.c==='OPEN'?'Open room 🌍':'Room '+S.c}</h2><div class=card style="text-align:center"><div class=big>${S.c}</div><div id=qr style="display:inline-block;padding:8px;background:#fff;margin-top:10px"></div><br><small>${S.c==='OPEN'?'Other classes can join from the home screen with “Join the open room”. No code needed.':'Scan this, or type the code in at '+esc(location.host)}</small></div><div class=card><h3>Players (${N()})</h3>${S.p.map(p=>chip(p)+(host&&p.id!==id?`<button data-a=ban data-i="${p.id}" style="width:auto;display:inline-block;padding:2px 8px;font-size:13px;box-shadow:none">remove</button>`:'')).join('')}</div>`+
  (host?'<div class=card style="background:var(--sun)"><b>📷 The camera is automatic in Dare Duty, Live Charades, Punishment Roulette and Stone Face.</b><br><small>It switches on by itself on your turn (your browser asks for permission).</small></div>'+GM.map(g=>`<button data-a=go data-g=${g[0]} ${N()<3?'disabled':''}>${g[1]} ${g[2]}<br><small>${g[3]}</small></button>`).join('')+(N()<3?'<p><small>You need at least 3 people to start.</small></p>':''):'<p>📷 In Dare Duty, Live Charades, Punishment Roulette and Stone Face your camera switches on by itself on your turn.</p>'+'<p>The host is picking a game.</p>')}
 const show=x=>x.k==='i'&&x.v?`<img class=d src="${x.v}">`:`<h3>${esc(x.v||'…')}</h3>`;
 function vDp(){
@@ -424,7 +425,7 @@ function render(){
  if(S.g==='sf'&&S.ph==='go'&&SFDW===S.t&&$('#cv'))return;
  shown=-1;qs=-1;cs=-1;
  const kp=['gs','pi','sft'].map(i=>{const e=$('#'+i);return e?{i,v:e.value,f:document.activeElement===e,k:i==='pi'||i==='sft'||GK===S.t}:null}).filter(Boolean);
- $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+'<p><small>build 14</small></p>';
+ $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+'<p><small>build 15</small></p>';
  if($('#qr')&&window.QRCode)new QRCode($('#qr'),{text:location.href.split(/[?#]/)[0]+'?room='+S.c,width:150,height:150});
  if($('#cv'))initCv();
  GK=$('#gs')?S.t:-1;kp.forEach(o=>{const e=$('#'+o.i);if(e&&o.k){if(o.v)e.value=o.v;if(o.f){e.focus();try{e.setSelectionRange(e.value.length,e.value.length)}catch(x){}}}});ppBind();
@@ -478,6 +479,7 @@ const A={
  out(){me=null;try{localStorage.removeItem('hop')}catch(e){}render()},
  host(){if(!ready())return;err='';startHost();render()},
  scan(){scanOpen()},
+ open(){if(!ready())return;err='';OPENING=1;OT=0;join('OPEN');render()},ban(d){act({t:'kick',i:d.i,b:1})},
  xa(){const el=$('#pi');if(!el)return;const v=el.value.trim();if(!v)return;el.value='';act({t:'xa',v})},xr(d){act({t:'xr',i:+d.i})},xgo(){act({t:'xgo'})},xg(){act({t:'xg'})},xv(d){act({t:'xv',y:+d.y})},
  join(){const c=$('#cd').value.trim();if(c.length===4&&ready()){err='';join(c);render()}},
  go(d){act({t:'go',g:d.g})},home(){act({t:'home'})},nx(){act({t:'nx'})},skip(){act({t:'skip'})},tv(){act({t:'tv'})},
