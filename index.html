@@ -31,6 +31,11 @@ canvas{width:100%;aspect-ratio:1;background:#fff;border:3px solid var(--ink);bor
 img.d{width:100%;border:3px solid var(--ink);border-radius:10px;display:block}
 .bar{height:20px;background:var(--blue);border:2px solid var(--ink);border-radius:6px;margin:6px 0}
 small{opacity:.75}
+@keyframes sfb{from{transform:scaleX(1)}to{transform:scaleX(0)}}
+@keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
+.pop{animation:pop .3s ease-out}
+.sfbar{transform-origin:left;background:var(--pink)}
+@media (prefers-reduced-motion:reduce){.pop{animation:none}}
 #camw{max-width:480px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px 0}#camw video{width:100%;max-height:38vh;object-fit:cover;background:#000;border:3px solid var(--ink);border-radius:14px;box-shadow:6px 6px 0 var(--ink);display:block}#camt{font-weight:800;margin:8px 0 0}
 </style></head><body><div id=camw hidden><video id=rv autoplay playsinline></video><div id=camt></div></div><div id=app></div>
 <script>
@@ -64,10 +69,10 @@ const WL=[['Dog','Eating spaghetti','Sleeping','Swimming','Brushing teeth','Cat'
 ['A waiter dropping a full tray','A ghost haunting a library','Parachuting into a swimming pool','Being chased by a bear','A chicken crossing the road','A pirate who found no treasure'],
 ['A mime stuck in a lift','A chef who can’t find the salt','Petting a cat that hates you','Getting a haircut you hate','A robot learning to dance','A detective solving the case of the missing cookie'],
 ['Finding Nemo','Jaws','Ghostbusters','Toy Story','The Lion King','Mission Impossible']];
-const GM=[['dp','🎨','Doodle Chain','Write something, draw it, guess it, pass it on. Gartic Phone style.'],['ml','👆','Most Likely To','Vote on who fits the prompt. You see who voted for who.'],['im','🕵️','Imposter','Same secret word for everyone except one bluffer. Send one-word clues, then vote them out.'],['qb','😂','Quip Battle','Everyone answers a daft prompt, then votes for the funniest.'],['sd','🥷','Dare Duty','One person at a time. Camera goes live on your turn, everyone judges. 8 levels, up to Mythic.'],['ch','🎭','Live Charades','Act a secret word on live camera, no talking. Everyone else types guesses. Gets harder every round.'],['pp','🎡','Punishment Roulette','Everyone writes punishments. Quick contests find the loser, who does a random one on live camera.']];
+const GM=[['dp','🎨','Doodle Chain','Write something, draw it, guess it, pass it on. Gartic Phone style.'],['ml','👆','Most Likely To','Vote on who fits the prompt. You see who voted for who.'],['im','🕵️','Imposter','Same secret word for everyone except one bluffer. Send one-word clues, then vote them out.'],['qb','😂','Quip Battle','Everyone answers a daft prompt, then votes for the funniest.'],['sd','🥷','Dare Duty','One person at a time. Camera goes live on your turn, everyone judges. 8 levels, up to Mythic.'],['ch','🎭','Live Charades','Act a secret word on live camera, no talking. Everyone else types guesses. Gets harder every round.'],['pp','🎡','Punishment Roulette','Everyone writes punishments. Quick contests find the loser, who does a random one on live camera.'],['sf','🗿','Stone Face','Keep a straight face on live camera while the class types and draws their own ridiculous stuff onto your screen. Spot the crack to score. Silent, so it works in class.']];
 let L={};try{L=JSON.parse(localStorage.hop)||{}}catch(e){}
 let me=L.n?{n:L.n,e:L.e}:null,tmp={n:L.n||'',e:L.e||EM[0]},peer,conns={},host=false,hc,id,S={p:[]},T=null,W=null,B=[],IM={},OR=[],SP=[],LS=null,VS=null,CALLED={},CALLS=[],seen={},HT=0,U={},PV={},GEN=0,RT=0,tries=0,last=0,room='',rcn=0,q=[],cs=-1,cd=-1,uid=(()=>{try{return sessionStorage.hopuid||(sessionStorage.hopuid='u'+Math.random().toString(36).slice(2,10))}catch(e){return'u'+Math.random().toString(36).slice(2,10)}})(),shown=-1,qs=-1,qd=-1,myA='',QA={},QO=[],QPool=[],err='',col=COL[0];
-let CT=-1,CERR='',CW='',CP=[],GK=-1,PP=[],SUBS={},CS={t:-1},PPT=0,PQ=[];
+let CT=-1,CERR='',CW='',CP=[],GK=-1,PP=[],SUBS={},CS={t:-1},PPT=0,PQ=[],SFT=0,SFA={},SFV={t:-1,at:0},SFN='',SFDW=-1;
 const R0=(()=>{try{return sessionStorage.hoproom||''}catch(e){return''}})();
 const Q0=(new URLSearchParams(location.search).get('room')||'').slice(0,4);
 const N=()=>S.p.length,pName=i=>{const p=S.p.find(p=>p.id===i);return p?p.e+' '+esc(p.n):'?'};
@@ -92,6 +97,7 @@ function ensureHost(){if(me&&!S.p.some(p=>p.id===id))S.p.unshift({id,n:me.n,e:me
 function drop(i){try{conns[i]&&conns[i].close()}catch(e){}delete conns[i];if(!S.p.some(p=>p.id===i))return;S.p=S.p.filter(p=>p.id!==i);
  if(S.g==='pp'&&N()>=3){delete SUBS[i];delete S.v[i];if(S.pd)delete S.pd[i];if(S.who===i&&(S.ph==='pun'||S.ph==='res'))return ppAfter();if(S.ph==='play'){if(S.p.every(p=>p.id in SUBS))return ppResolve();return bcast()}if(S.ph==='pun')return ppVoteCheck();return bcast()}
  if(S.g==='ch'&&N()>=3){OR=OR.filter(x=>x!==i);if(S.who!==i)return bcast();if(S.t>=S.T)S.ph='end';else chNext();return bcast()}
+ if(S.g==='sf'&&N()>=3){OR=OR.filter(x=>x!==i);if(S.cr)delete S.cr[i];if(S.am)delete S.am[i];if(S.who!==i)return sfCheck();clearTimeout(SFT);if(S.t>=S.T)S.ph='end';else sfNext();return bcast()}
  if(S.g==='sd'&&N()>=3){OR=OR.filter(x=>x!==i);delete S.v[i];if(S.who!==i)return sdCheck();if(S.t>=S.T)S.ph='end';else sdNext();return bcast()}
  if(S.g){S.g=null;S.ph='lobby';ensureHost()}bcast()}
 const wake=()=>{try{navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}};
@@ -120,10 +126,10 @@ function handle(f,m){
  if(m.t==='hb')return;
  if(H0(f)&&m.t==='kick'&&m.i!==f)return drop(m.i);
  if(H0(f)&&m.t==='camset'){S.cam=S.cam?0:1;if(!S.cam)S.live=0;return bcast()}
- if(m.t==='join'){const q0=S.p.find(p=>p.id===f);if(q0){q0.pi=m.pi;Object.values(PV[f]||{}).forEach(x=>send(f,x));return bcast()}if(S.g&&S.g!=='sd'&&S.g!=='ch'&&S.g!=='pp')return send(f,{t:'x'});if(!S.p.some(p=>p.id===f)){S.p.push({id:f,n:String(m.n).slice(0,12),e:EM.includes(m.e)?m.e:'🙂',s:0,sk:2,st:0,pi:m.pi});if(S.g==='sd'||S.g==='ch')OR.push(f)}return bcast()}
+ if(m.t==='join'){const q0=S.p.find(p=>p.id===f);if(q0){q0.pi=m.pi;Object.values(PV[f]||{}).forEach(x=>send(f,x));return bcast()}if(S.g&&S.g!=='sd'&&S.g!=='ch'&&S.g!=='pp'&&S.g!=='sf')return send(f,{t:'x'});if(!S.p.some(p=>p.id===f)){S.p.push({id:f,n:String(m.n).slice(0,12),e:EM.includes(m.e)?m.e:'🙂',s:0,sk:2,st:0,pi:m.pi});if(S.g==='sd'||S.g==='ch'||S.g==='sf')OR.push(f);if(S.g==='sf'&&S.am)S.am[f]=3}return bcast()}
  const G=S.g,H=f===id;
  if(H&&m.t==='go'&&!G&&N()>=3)return start(m.g);
- if(H&&m.t==='home'){ensureHost();S.g=null;S.ph='lobby';return bcast()}
+ if(H&&m.t==='home'){clearTimeout(SFT);ensureHost();S.g=null;S.ph='lobby';return bcast()}
  if(G==='dp'){
   const k=S.p.findIndex(p=>p.id===f);
   if(m.t==='sub'&&S.ph==='play'&&m.r===S.r&&!S.done[f]){
@@ -169,6 +175,22 @@ function handle(f,m){
   if(H&&m.t==='nx'&&S.ph==='res'){if(S.t>=S.T)S.ph='end';else chNext();return bcast()}
   if(H&&m.t==='fin'){S.ph='end';return bcast()}
  }
+ if(G==='sf'){
+  const w=f===S.who,go=S.ph==='go',pl=S.p.some(p=>p.id===f);
+  if(w&&go&&S.cam&&m.t==='live'){S.live=m.on?1:0;if(S.live&&!S.on)sfStart();return bcast()}
+  if(H&&go&&!S.on&&m.t==='sfgo'){sfStart();return bcast()}
+  if(w&&go&&S.on&&m.t==='sfq')return sfFin(0,'gaveup');
+  if(go&&S.on&&!w&&pl&&m.t==='sfx'&&!S.cr[f]){S.cr[f]=1;return sfCheck()}
+  if(go&&S.on&&!w&&pl&&m.t==='sfa'&&(S.am[f]||0)>0&&Date.now()-(SFA[f]||0)>1200){
+   let v='';
+   if(m.k==='t')v=String(m.v||'').trim().slice(0,60);
+   else if(m.k==='d'){v=String(m.v||'');if(!v.startsWith('data:image/jpeg;base64,')||v.length>150000)v=''}
+   if(!v)return;
+   SFA[f]=Date.now();S.am[f]--;S.n++;
+   S.fx=(S.fx||[]).map(x=>x.k==='d'?{...x,v:''}:x).concat({by:f,k:m.k,v,n:S.n,ts:Date.now()}).slice(-4);return bcast()}
+  if(H&&m.t==='nx'&&S.ph==='res'){if(S.t>=S.T)S.ph='end';else sfNext();return bcast()}
+  if(H&&m.t==='fin'){clearTimeout(SFT);S.ph='end';S.live=0;return bcast()}
+ }
  if(G==='sd'){
   const w=f===S.who,go=S.ph==='go';
   if(w&&go&&m.t==='sdd'){S.cp=1;return sdCheck()}
@@ -195,6 +217,7 @@ function start(g){PV={};ensureHost();S.kk='';S.cam=1;S.g=g;S.v={};
  if(g==='im')imNew();
  if(g==='sd'){S.p.forEach(p=>{p.s=0;p.sk=2;p.st=0});OR=S.p.map(p=>p.id).sort(()=>Math.random()-.5);SP=SD.map(a=>[...a].sort(()=>Math.random()-.5));S.t=0;S.T=N()*Math.max(2,Math.ceil(18/N()));sdNext()}
  if(g==='ch'){S.p.forEach(p=>{p.s=0;p.sk=2;p.st=0});OR=S.p.map(p=>p.id).sort(()=>Math.random()-.5);CP=WL.map(a=>[...a].sort(()=>Math.random()-.5));S.t=0;S.T=N()*Math.max(2,Math.ceil(16/N()));chNext()}
+ if(g==='sf'){clearTimeout(SFT);S.p.forEach(p=>{p.s=0;p.sk=2;p.st=0});OR=S.p.map(p=>p.id).sort(()=>Math.random()-.5);S.t=0;S.T=N()*Math.max(1,Math.ceil(9/N()));sfNext()}
  if(g==='pp'){S.p.forEach(p=>{p.s=0;p.sk=2;p.st=0});PP=[];SUBS={};clearTimeout(PPT);S.t=0;S.ph='mk';S.pn=0;S.pd={};S.rs=null;S.who=null}
  if(g==='qb'){S.r=0;QPool=[...QP].sort(()=>Math.random()-.5);qNext()}
  bcast()}
@@ -207,6 +230,15 @@ function sdFin(ok,why,y,n){const p=S.p.find(p=>p.id===S.who),pts=ok?S.lv:-1;let 
  if(p){p.s+=pts;if(ok){p.st++;if(p.st>=3){p.st=0;if(p.sk<4){p.sk++;bonus=1}}}else p.st=0}
  S.out={ok,why,y:y||0,n:n||0,pts,bonus};S.live=0;S.ph='res';bcast()}
 function sdVote(){const v=Object.values(S.v),y=v.filter(x=>x).length,n=v.length-y;sdFin(v.length>0&&y>=n,'vote',y,n)}
+function sfNext(){clearTimeout(SFT);S.t++;S.ph='go';S.on=0;S.live=0;S.out=null;S.fx=[];S.n=0;S.cr={};S.am={};SFA={};S.who=OR[(S.t-1)%OR.length];
+ S.dur=15+5*Math.min(2,Math.floor((S.t-1)*3/S.T));S.p.forEach(p=>S.am[p.id]=3);if(!S.cam)sfStart()}
+function sfStart(){S.on=1;S.n=0;S.fx=[];clearTimeout(SFT);const t=S.t;SFT=setTimeout(()=>{if(S.g==='sf'&&S.ph==='go'&&S.t===t&&S.on)sfFin(1,'time')},S.dur*1000)}
+function sfCheck(){if(S.ph!=='go'||!S.on)return bcast();const vw=N()-1,need=Math.floor(vw/2)+1,c=Object.keys(S.cr).filter(k=>k!==S.who&&S.p.some(p=>p.id===k)).length;if(vw>0&&c>=need)return sfFin(0,'cracked');bcast()}
+function sfFin(ok,why){clearTimeout(SFT);const a=S.p.find(p=>p.id===S.who),sp=Object.keys(S.cr||{}).filter(k=>k!==S.who&&S.p.some(p=>p.id===k));let as=null,pts=0;
+ if(ok){pts=3;if(a)a.s+=3}
+ else if(why==='cracked'){sp.forEach(k=>{const p=S.p.find(p=>p.id===k);if(p)p.s++});const l=[...(S.fx||[])].reverse().find(x=>Date.now()-x.ts<6000&&x.by!==S.who&&S.p.some(p=>p.id===x.by));if(l){as=l.by;const p=S.p.find(p=>p.id===as);if(p)p.s++}}
+ else{pts=-1;if(a)a.s-=1}
+ S.out={ok,why,sp,as,pts};S.live=0;S.on=0;S.ph='res';bcast()}
 const DEFP=['Do your best celebrity impression for 20 seconds','Talk like a robot until the next round ends','Do 10 star jumps while counting backwards from 20','Sing the chorus of a song the room picks','Use a silly accent of the group’s choice until the next round','Do a runway walk across the room with full attitude','Give every player a made-up award with a dramatic speech','Speak only in questions until the next round','Do the chicken dance for 20 seconds','Tell a harmless, embarrassing story from your life','Hold a plank for 20 seconds','Mime your whole morning routine in 15 seconds','Do a dramatic reading of the back of any product','Walk across the room with a book on your head','Give a 20 second speech on why socks are overrated','Dance with no music for 20 seconds','Talk like a pirate until the next round','Do your best baby animal impression for 15 seconds','Narrate everything you do like a nature documentary until the next round','Compliment every player in the most over-the-top way you can'];
 function ppGo(){S.T=Math.max(5,N()+2);[...DEFP].sort(()=>Math.random()-.5).forEach(t=>{if(PP.length<S.T&&!PP.some(x=>x.t===t))PP.push({t,by:null,u:0})});S.t=0;PQ=[];S.k='';ppNext();bcast()}
 function ppNext(){S.t++;S.ph='play';S.live=0;S.out=null;S.rs=null;S.pt='';S.who=null;S.v={};SUBS={};
@@ -265,7 +297,7 @@ function imRes(){const c=tal(),mx=Math.max(...Object.values(c)),top=Object.keys(
 function vSign(){return `<h1>Hop In 🎈</h1><p>Party games for you and your mates. Free, and there’s no app to download.</p><div class=card><h3>Who are you?</h3><input id=nm maxlength=12 placeholder="Your name" value="${esc(tmp.n)}"><div class=row style="margin:8px 0">${EM.map(e=>`<button class="e ${e===tmp.e?'on':''}" data-a=em data-e="${e}">${e}</button>`).join('')}</div><button class=r data-a=signin>Right, let’s go</button></div>`}
 function vHome(){return `<h1>Hop In 🎈</h1>`+(peer?'<p>Connecting…</p>':`<div class=card>${chip(me)}<button data-a=out style="width:auto;display:inline-block;padding:3px 10px;font-size:14px;box-shadow:none">not you?</button><button class=r data-a=host>Start a room</button><h3>Got a code?</h3><input id=cd maxlength=4 value="${esc(Q0)}" placeholder="CODE" style="text-align:center;letter-spacing:8px;text-transform:uppercase"><button class=t data-a=join>Join</button><button data-a=scan>📷 Scan a QR code</button></div>`+(err?`<div class=card>${esc(err)}</div>`:''))}
 function vLobby(){return `<h2>Room ${S.c}</h2><div class=card style="text-align:center"><div class=big>${S.c}</div><div id=qr style="display:inline-block;padding:8px;background:#fff;margin-top:10px"></div><br><small>Scan this, or type the code in at ${esc(location.host)}</small></div><div class=card><h3>Players (${N()})</h3>${S.p.map(chip).join('')}</div>`+
- (host?'<div class=card style="background:var(--sun)"><b>📷 The camera is automatic in Dare Duty, Live Charades and Punishment Roulette.</b><br><small>It switches on by itself on your turn (your browser asks for permission).</small></div>'+GM.map(g=>`<button data-a=go data-g=${g[0]} ${N()<3?'disabled':''}>${g[1]} ${g[2]}<br><small>${g[3]}</small></button>`).join('')+(N()<3?'<p><small>You need at least 3 people to start.</small></p>':''):'<p>📷 In Dare Duty, Live Charades and Punishment Roulette your camera switches on by itself on your turn.</p>'+'<p>The host is picking a game.</p>')}
+ (host?'<div class=card style="background:var(--sun)"><b>📷 The camera is automatic in Dare Duty, Live Charades, Punishment Roulette and Stone Face.</b><br><small>It switches on by itself on your turn (your browser asks for permission).</small></div>'+GM.map(g=>`<button data-a=go data-g=${g[0]} ${N()<3?'disabled':''}>${g[1]} ${g[2]}<br><small>${g[3]}</small></button>`).join('')+(N()<3?'<p><small>You need at least 3 people to start.</small></p>':''):'<p>📷 In Dare Duty, Live Charades, Punishment Roulette and Stone Face your camera switches on by itself on your turn.</p>'+'<p>The host is picking a game.</p>')}
 const show=x=>x.k==='i'&&x.v?`<img class=d src="${x.v}">`:`<h3>${esc(x.v||'…')}</h3>`;
 function vDp(){
  if(S.ph==='rev'){const b=S.books[S.i];return `<h2>Chain ${S.i+1} of ${N()}</h2>`+b.slice(0,S.j).map(x=>`<div class=card><span class=tag>${pName(x.by)}</span>${show(x)}</div>`).join('')+(host?`<button class=r data-a=nx>${S.j<b.length||S.i<N()-1?'Next':'Finish'}</button>`:'<p>The host is flicking through. Watch their screen.</p>')}
@@ -322,6 +354,32 @@ function vPp(){
   return tg+rs+pc+`<p>Watch ${w}. Did they do it?</p><button class="${vv===1?'r':''}" data-a=xv data-y="1">✔ They did it</button><button class="${vv===0?'r':''}" data-a=xv data-y="0">✖ They didn’t</button><p><small>${got}/${nv} voted</small></p>`+hb+'<p><small>Keep it safe: nothing painful, and no touching people.</small></p>'}
  const o=S.out;
  return tg+rs+pc+`<h2>${o.gu?'Chickened out':o.ok?'Punishment done!':'Bottled it'}</h2><p>${o.gu?w+' passed. <b>-1</b>':`${o.y} said yes, ${o.n} said no. <b>${o.ok?'+1':'-1'}</b> for ${w}.`}</p><p><small>Everyone who didn’t lose got +1.</small></p>`+(host?`<button class=r data-a=nx>${S.t>=S.T?'Final scores':'Next round'}</button><button data-a=fin>End the game now</button>`:'')}
+const sfTxt=x=>x.k==='d'?'✏️ sent a doodle':esc(x.v);
+function vSf(){
+ if(S.ph==='end'){const mx=Math.max(...S.p.map(p=>p.s));return `<h2>🗿 ${S.p.filter(p=>p.s===mx).map(p=>p.e+' '+esc(p.n)).join(' & ')}</h2><p>Stoniest face in the room, with ${mx} point${mx===1?'':'s'}.</p>`}
+ const mine=S.who===id,w=pName(S.who),vw=N()-1,need=Math.floor(vw/2)+1,o=S.out,
+ tg=`<span class=tag>Round ${S.t} of ${S.T}: ${S.dur}s</span>`;
+ if(S.ph==='res'){
+  const h=o.ok?`<h2>🗿 Stone cold!</h2><p>${w} kept a straight face for ${S.dur} seconds. <b>+${o.pts}</b></p>`
+   :o.why==='cracked'?`<h2>😂 Cracked!</h2><p>${w} broke. Spotted by ${o.sp.map(pName).join(', ')} (<b>+1</b> each).</p>`+(o.as?`<p>Assist for the hit that did it: ${pName(o.as)} <b>+1</b></p>`:'')
+   :`<h2>🏳️ ${w} gave up</h2><p><b>-1</b> for ${w}.</p>`;
+  return tg+`<div class=card style="text-align:center">${h}</div>`+(host?`<button class=r data-a=nx>${S.t>=S.T?'Final scores':'Next face'}</button><button data-a=fin>End the game now</button>`:'')}
+ if(S.on&&SFV.t!==S.t)SFV={t:S.t,at:Date.now()};
+ const el=S.on?(Date.now()-SFV.at)/1000:0,
+ bar=S.on?`<div class="bar sfbar" style="animation:sfb ${S.dur}s linear forwards;animation-delay:-${el.toFixed(2)}s"></div>`:'',
+ last=(S.fx||[]).slice(-1)[0],key=last?S.t+'-'+last.n:'',pop=last&&key!==SFN?' pop':'';if(last)SFN=key;
+ const go=host&&!S.on?'<button class=t data-a=sfgo>Start the clock now</button>':'';
+ if(mine){
+  const cb=LS?'':CERR?`<p>${esc(CERR)}</p><button data-a=camretry>📷 Try camera again</button>`:'<p><small>📷 Starting your camera…</small></p>';
+  if(!S.on)return tg+`<div class=card style="background:var(--pink);text-align:center"><h2>You’re up 🗿</h2><p>Your camera goes live, then the class fires silly stuff at your screen. Keep a straight face for ${S.dur} seconds.</p></div>`+cb+go;
+  const body=!last?'<h2>Straight face…</h2><p>Here it comes.</p>':`<span class=tag>${pName(last.by)}</span>`+(last.k==='d'?(last.v?`<img class=d src="${last.v}">`:'<h2>✏️</h2>'):`<h2>${sfTxt(last)}</h2>`);
+  return tg+bar+`<div class="card${pop}" style="background:var(--mint);text-align:center;min-height:170px">${body}</div><button data-a=sfq>I can’t, I’m cracking 😂 (-1)</button>`+'<p><small>Look at your screen, not the camera. The class decides if you crack.</small></p>'}
+ if(!S.on)return tg+`<div class=card style="background:var(--mint);text-align:center"><h3>${w} is getting their camera ready</h3><small>The clock starts when they go live.</small></div>`+go;
+ const c=Object.keys(S.cr).length,am=(S.am||{})[id]||0,sp=S.cr[id],ds=am?'':'disabled',
+ feed=(S.fx||[]).slice(-3).reverse().map(x=>`<div class="card${x.n===(last||{}).n?pop:''}" style="margin:8px 0;padding:10px"><span class=tag>${pName(x.by)}</span> ${x.k==='d'&&x.v?`<img class=d src="${x.v}" style="margin-top:6px">`:sfTxt(x)}</div>`).join('');
+ return tg+bar+`<h2>Watch ${w}’s face</h2><button class=r data-a=sfx ${sp?'disabled':''} style="padding:20px;font-size:22px;text-align:center">${sp?'Spotted ✅':'😂 They cracked!'}</button><p><small>${c}/${need} spotters needed to call it. Only tap when you really see a smile.</small></p>`+
+  (SFDW===S.t?`<div class=card><h3>Draw something silly (${am} left)</h3><canvas id=cv width=260 height=260></canvas><div class=sw>${COL.map(c=>`<b data-a=col data-c="${c}" style="background:${c}"></b>`).join('')}</div><button data-a=clr style="width:auto;display:inline-block">Clear</button><button class=r data-a=sfd>Send doodle</button><button data-a=sfdx>Cancel</button></div>`
+  :`<div class=card><h3>Hit them (${am} left)</h3><input id=sft maxlength=60 placeholder="Type something ridiculous" autocomplete=off ${ds}><button class=r data-a=sfs ${ds}>Send it</button><button data-a=sfdr ${ds}>✏️ Draw something instead</button><small>Keep it silly, not mean. They see who sent it.</small></div>`)+feed}
 function vQb(){
  const tg=`<span class=tag>Round ${S.r} of 4</span>`;
  if(S.ph==='ans'){
@@ -341,11 +399,11 @@ function vIm(){
  if(S.ph==='vote')return sec+`<h2>Who’s the imposter?</h2>`+cls()+(S.v[id]?`<p>Vote sent. ${Object.keys(S.v).length}/${N()} voted.</p>`:S.p.filter(p=>p.id!==id).map(p=>`<button data-a=vote data-i="${p.id}">${p.e} ${esc(p.n)}</button>`).join(''));
  return `<h2>${S.caught?'Got them! 🎉':'The imposter got away with it 😈'}</h2><div class=card>Imposter: <b>${pName(S.bad)}</b><br>Word: <b>${esc(S.w)}</b></div>`+cls()+vres()+(host?'<button class=r data-a=nx>Another round</button>':'')}
 const board=()=>S.g==='dp'?'':`<div class=card><h3>Scores</h3>${[...S.p].sort((a,b)=>b.s-a.s).map(p=>chip(p)+'<b>'+p.s+'</b>'+(S.g==='sd'?' <small>⏭'+p.sk+'</small>':'')+(host&&p.z?`<button data-a=kick data-i="${p.id}" style="width:auto;display:inline-block;padding:2px 8px;font-size:13px;box-shadow:none">kick</button>`:'')).join(' ')}</div>`;
-const vGame=()=>({dp:vDp,ml:vMl,im:vIm,qb:vQb,sd:vSd,ch:vCh,pp:vPp}[S.g])()+board()+(host?'<button data-a=home>Back to lobby</button>':'');
+const vGame=()=>({dp:vDp,ml:vMl,im:vIm,qb:vQb,sd:vSd,ch:vCh,pp:vPp,sf:vSf}[S.g])()+board()+(host?'<button data-a=home>Back to lobby</button>':'');
 
 async function autoCam(){const t=S.t;try{const s=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:320},height:{ideal:240},frameRate:{ideal:15}},audio:true});if(!(camOn()&&S.who===id&&S.t===t)){s.getTracks().forEach(x=>x.stop());return}LS=s;CERR='';act({t:'live',on:1})}catch(e){CERR='The camera didn’t start. Allow camera and mic access in your browser, then try again.'}render()}
-function onCall(c){const d=S.p.find(p=>p.id===S.who);if(!((S.g==='sd'||S.g==='ch'||S.g==='pp')&&S.cam&&S.who!==id&&d&&d.pi===c.peer))return;c.answer();c.on('stream',s=>{VS=s;camUI()})}
-const camOn=()=>S.cam&&(((S.g==='sd'||S.g==='ch')&&S.ph==='go')||(S.g==='pp'&&S.ph==='pun'));
+function onCall(c){const d=S.p.find(p=>p.id===S.who);if(!((S.g==='sd'||S.g==='ch'||S.g==='pp'||S.g==='sf')&&S.cam&&S.who!==id&&d&&d.pi===c.peer))return;c.answer();c.on('stream',s=>{VS=s;camUI()})}
+const camOn=()=>S.cam&&(((S.g==='sd'||S.g==='ch'||S.g==='sf')&&S.ph==='go')||(S.g==='pp'&&S.ph==='pun'));
 function camUI(){
  const on=camOn(),mine=S.who===id;
  if(!(on&&mine))CT=-1;else if(!LS&&CT!==S.t){CT=S.t;autoCam()}
@@ -363,9 +421,10 @@ function render(){
  if(shown>=0&&T&&!T.done&&shown===T.r&&T.r===S.r&&S.g==='dp'&&S.ph==='play')return;
  if(qs===S.r&&S.g==='qb'&&S.ph==='ans'&&qd!==S.r)return;
  if(cs===S.k&&S.g==='im'&&S.ph==='clue'&&cd!==S.k)return;
+ if(S.g==='sf'&&S.ph==='go'&&SFDW===S.t&&$('#cv'))return;
  shown=-1;qs=-1;cs=-1;
- const kp=['gs','pi'].map(i=>{const e=$('#'+i);return e?{i,v:e.value,f:document.activeElement===e,k:i==='pi'||GK===S.t}:null}).filter(Boolean);
- $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+'<p><small>build 13</small></p>';
+ const kp=['gs','pi','sft'].map(i=>{const e=$('#'+i);return e?{i,v:e.value,f:document.activeElement===e,k:i==='pi'||i==='sft'||GK===S.t}:null}).filter(Boolean);
+ $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+'<p><small>build 14</small></p>';
  if($('#qr')&&window.QRCode)new QRCode($('#qr'),{text:location.href.split(/[?#]/)[0]+'?room='+S.c,width:150,height:150});
  if($('#cv'))initCv();
  GK=$('#gs')?S.t:-1;kp.forEach(o=>{const e=$('#'+o.i);if(e&&o.k){if(o.v)e.value=o.v;if(o.f){e.focus();try{e.setSelectionRange(e.value.length,e.value.length)}catch(x){}}}});ppBind();
@@ -430,11 +489,14 @@ const A={
  gs(){const el=$('#gs');if(!el)return;const v=el.value.trim();if(!v)return;el.value='';act({t:'gs',v})},gu(){act({t:'gu'})},
  camretry(){CT=-1;CERR='';render()},
  camoff(){if(LS){LS.getTracks().forEach(t=>t.stop());LS=null}CALLS.forEach(c=>{try{c.close()}catch(e){}});CALLS=[];CALLED={};act({t:'live',on:0});render()},camset(){act({t:'camset'})},
+ sfs(){const el=$('#sft');if(!el)return;const v=el.value.trim();if(!v)return;el.value='';act({t:'sfa',k:'t',v})},
+ sfdr(){SFDW=S.t;render()},sfdx(){SFDW=-1;render()},sfd(){const c=$('#cv');if(!c)return;const v=c.toDataURL('image/jpeg',.4);SFDW=-1;act({t:'sfa',k:'d',v});render()},
+ sfx(){act({t:'sfx'})},sfq(){act({t:'sfq'})},sfgo(){act({t:'sfgo'})},
  sdd(){act({t:'sdd'})},sdc(){act({t:'sdc'})},sdk(){act({t:'sdk'})},fin(){act({t:'fin'})},sv(d){act({t:'sv',y:+d.y})},ev(){act({t:'ev'})},
  clr(){const c=$('#cv'),x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,260,260)},
  sub(){const t=T;const v=t.k==='t'?($('#tx').value.trim()||'(blank)'):$('#cv').toDataURL('image/jpeg',.5);t.done=true;act({t:'sub',r:t.r,v});render()}
 };
-document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='gs')A.gs();else if(e.target.id==='pi')A.xa()}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='gs')A.gs();else if(e.target.id==='pi')A.xa();else if(e.target.id==='sft')A.sfs()}});
 document.onclick=e=>{const b=e.target.closest('[data-a]');if(b&&A[b.dataset.a])A[b.dataset.a](b.dataset)};
 render();
 window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&&window.Peer){join(c);render()}});
