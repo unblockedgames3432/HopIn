@@ -31,13 +31,19 @@ canvas{width:100%;aspect-ratio:1;background:#fff;border:3px solid var(--ink);bor
 img.d{width:100%;border:3px solid var(--ink);border-radius:10px;display:block}
 .bar{height:20px;background:var(--blue);border:2px solid var(--ink);border-radius:6px;margin:6px 0}
 small{opacity:.75}
+#bkb{position:fixed;right:12px;bottom:12px;z-index:90;width:42px;height:42px;margin:0;padding:0;border-radius:50%;font-size:20px;text-align:center;opacity:.85;box-shadow:2px 2px 0 var(--ink)}
+#bkt{position:fixed;left:12px;right:68px;bottom:12px;z-index:91;background:var(--ink);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;font-size:15px}
+#bkt[hidden]{display:none}
+#bk{position:fixed;inset:0;z-index:100;background:#fff;color:#222;font:17px/1.6 Georgia,'Times New Roman',serif;overflow:auto;padding:max(22px,env(safe-area-inset-top)) 22px 40px}
+#bk[hidden]{display:none}#bk h2{font-family:Georgia,serif;font-size:24px;margin:0 0 4px;color:#222}#bk p{margin:.6em 0}#bk .pg{color:#555;font-size:14px;cursor:pointer;text-decoration:underline;margin-top:28px}
 @keyframes sfb{from{transform:scaleX(1)}to{transform:scaleX(0)}}
 @keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.06)}100%{transform:scale(1);opacity:1}}
 .pop{animation:pop .3s ease-out}
 .sfbar{transform-origin:left;background:var(--pink)}
 @media (prefers-reduced-motion:reduce){.pop{animation:none}}
 #camw{max-width:480px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px 0}#camw video{width:100%;max-height:38vh;object-fit:cover;background:#000;border:3px solid var(--ink);border-radius:14px;box-shadow:6px 6px 0 var(--ink);display:block}#camt{font-weight:800;margin:8px 0 0}
-</style></head><body><div id=camw hidden><video id=rv autoplay playsinline></video><div id=camt></div></div><div id=app></div>
+</style></head><body><div id=camw hidden><video id=rv autoplay playsinline></video><div id=camt></div></div><div id=app></div><button id=bkb aria-label="Hide the game" title="Hide the game (Esc)">🫣</button>
+<div id=bkt hidden>🫣 Teacher coming? Tap the face, or press Esc, to hide the game.</div><div id=bk hidden><h2>Year 9 Maths: Fractions Revision</h2><p style="color:#555;margin-top:0">Worksheet 4B. Show your working for every question.</p><p>1. Simplify 18/24, then write it as a decimal.</p><p>2. Work out 2/3 + 3/5. Give your answer as a mixed number where you can.</p><p>3. A recipe needs 3/4 of a cup of flour for 6 muffins. How much flour is needed for 15 muffins?</p><p>4. Put these in order from smallest to largest: 5/8, 0.6, 7/12, 62%.</p><p>5. Explain why 7/9 is greater than 3/4 without using a calculator.</p><div class=pg id=bkx>Page 1 of 2</div></div>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const EM=['🦊','🐙','🐸','🦄','🐧','🐯','🦖','🐝','🐳','🦉'],COL=['#151515','#ff4d94','#2c4bff','#1fb36f','#ffd93b','#fff'];
@@ -75,6 +81,7 @@ let me=L.n?{n:L.n,e:L.e}:null,tmp={n:L.n||'',e:L.e||EM[0]},peer,conns={},host=fa
 let CT=-1,CERR='',CW='',CP=[],GK=-1,PP=[],SUBS={},CS={t:-1},PPT=0,PQ=[],SFT=0,SFA={},SFV={t:-1,at:0},SFN='',SFDW=-1,OPENING=0,OT=0,BAN={};
 const R0=(()=>{try{return sessionStorage.hoproom||''}catch(e){return''}})();
 const Q0=(new URLSearchParams(location.search).get('room')||'').slice(0,4);
+const BKN='<div class=card style="background:var(--mint);padding:12px;margin:12px 0">🫣 <b>Teacher coming?</b> Tap the face in the bottom corner, or press Esc, to hide the game. Tap “Page 1 of 2” to come back.</div>';
 const N=()=>S.p.length,pName=i=>{const p=S.p.find(p=>p.id===i);return p?p.e+' '+esc(p.n):'?'};
 const chip=p=>`<span class=pl><span class=av>${p.e}</span>${esc(p.n)}${p.z?' 💤':''}</span>`;
 const tal=()=>{const c={};Object.values(S.v||{}).forEach(t=>c[t]=(c[t]||0)+1);return c};
@@ -426,10 +433,11 @@ function render(){
  if(S.g==='sf'&&S.ph==='go'&&SFDW===S.t&&$('#cv'))return;
  shown=-1;qs=-1;cs=-1;
  const kp=['gs','pi','sft'].map(i=>{const e=$('#'+i);return e?{i,v:e.value,f:document.activeElement===e,k:i==='pi'||i==='sft'||GK===S.t}:null}).filter(Boolean);
- $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+'<p><small>build 17</small></p>';
+ $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+(S.g?'':BKN)+'<p><small>build 19</small></p>';
  if($('#qr')&&window.QRCode)new QRCode($('#qr'),{text:location.href.split(/[?#]/)[0]+'?room='+S.c,width:230,height:230,correctLevel:QRCode.CorrectLevel.L});
  if($('#cv'))initCv();
  GK=$('#gs')?S.t:-1;kp.forEach(o=>{const e=$('#'+o.i);if(e&&o.k){if(o.v)e.value=o.v;if(o.f){e.focus();try{e.setSelectionRange(e.value.length,e.value.length)}catch(x){}}}});ppBind();
+ if(S.p.length&&!BKT){BKT=1;const t=$('#bkt');t.hidden=false;setTimeout(()=>{t.hidden=true},8000)}
 }
 function initCv(){
  const c=$('#cv'),x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,260,260);x.lineCap=x.lineJoin='round';let d=0,lx,ly;
@@ -504,6 +512,10 @@ const A={
  sub(){const t=T;const v=t.k==='t'?($('#tx').value.trim()||'(blank)'):$('#cv').toDataURL('image/jpeg',.5);t.done=true;act({t:'sub',r:t.r,v});render()}
 };
 document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='gs')A.gs();else if(e.target.id==='pi')A.xa();else if(e.target.id==='sft')A.sfs()}});
+let BK=0,BT=document.title,BKT=0;
+function bk(on){BK=on;const o=$('#bk');o.hidden=!on;document.title=on?'Fractions Revision':BT;if(on)o.scrollTop=0}
+$('#bkb').onclick=()=>bk(1);$('#bkx').onclick=()=>bk(0);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')bk(!BK)});
 document.onclick=e=>{const b=e.target.closest('[data-a]');if(b&&A[b.dataset.a])A[b.dataset.a](b.dataset)};
 render();
 window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&&window.Peer){join(c);render()}});
