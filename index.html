@@ -102,7 +102,7 @@ function recv(m){
 function fail(m){OPENING=0;err=m;GEN++;clearInterval(HT);clearTimeout(RT);RT=0;rcn=0;room='';try{sessionStorage.removeItem('hoproom')}catch(e){}try{peer.destroy()}catch(e){}peer=null;hc=null;conns={};host=false;S={p:[]};T=W=null;shown=-1;qs=qd=cs=cd=-1;render()}
 const H0=f=>f===id;
 function ensureHost(){if(me&&!S.p.some(p=>p.id===id))S.p.unshift({id,n:me.n,e:me.e,s:0,sk:2,st:0,pi:id})}
-function drop(i){try{conns[i]&&conns[i].close()}catch(e){}delete conns[i];if(!S.p.some(p=>p.id===i))return;S.p=S.p.filter(p=>p.id!==i);
+function drop(i){try{conns[i]&&conns[i].close()}catch(e){}delete conns[i];if(!S.p.some(p=>p.id===i))return;S.p=S.p.filter(p=>p.id!==i);if(S.gv)delete S.gv[i];
  if(S.g==='pp'&&N()>=3){delete SUBS[i];delete S.v[i];if(S.pd)delete S.pd[i];if(S.who===i&&(S.ph==='pun'||S.ph==='res'))return ppAfter();if(S.ph==='play'){if(S.p.every(p=>p.id in SUBS))return ppResolve();return bcast()}if(S.ph==='pun')return ppVoteCheck();return bcast()}
  if(S.g==='ch'&&N()>=3){OR=OR.filter(x=>x!==i);if(S.who!==i)return bcast();if(S.t>=S.T)S.ph='end';else chNext();return bcast()}
  if(S.g==='sf'&&N()>=3){OR=OR.filter(x=>x!==i);if(S.cr)delete S.cr[i];if(S.am)delete S.am[i];if(S.who!==i)return sfCheck();clearTimeout(SFT);if(S.t>=S.T)S.ph='end';else sfNext();return bcast()}
@@ -137,8 +137,10 @@ function handle(f,m){
  if(H0(f)&&m.t==='camset'){S.cam=S.cam?0:1;if(!S.cam)S.live=0;return bcast()}
  if(m.t==='join'){if(BAN[f])return send(f,{t:'ban'});const q0=S.p.find(p=>p.id===f);if(q0){q0.pi=m.pi;Object.values(PV[f]||{}).forEach(x=>send(f,x));return bcast()}if(S.g&&S.g!=='sd'&&S.g!=='ch'&&S.g!=='pp'&&S.g!=='sf')return send(f,{t:'x'});if(!S.p.some(p=>p.id===f)){S.p.push({id:f,n:String(m.n).slice(0,12),e:EM.includes(m.e)?m.e:'🙂',s:0,sk:2,st:0,pi:m.pi});if(S.g==='sd'||S.g==='ch'||S.g==='sf')OR.push(f);if(S.g==='sf'&&S.am)S.am[f]=3}return bcast()}
  const G=S.g,H=f===id;
- if(H&&m.t==='go'&&!G&&N()>=3)return start(m.g);
- if(H&&m.t==='home'){clearTimeout(SFT);ensureHost();S.g=null;S.ph='lobby';return bcast()}
+ if(S.c==='OPEN'&&!G&&m.t==='gv'&&S.p.some(p=>p.id===f)&&GM.some(g=>g[0]===m.g)){(S.gv=S.gv||{})[f]=m.g;return gvCheck()}
+ if(S.c==='OPEN'&&H&&!G&&m.t==='gvgo'&&N()>=3)return gvStart();
+ if(H&&m.t==='go'&&!G&&N()>=3&&S.c!=='OPEN')return start(m.g);
+ if(H&&m.t==='home'){clearTimeout(SFT);S.gv={};ensureHost();S.g=null;S.ph='lobby';return bcast()}
  if(G==='dp'){
   const k=S.p.findIndex(p=>p.id===f);
   if(m.t==='sub'&&S.ph==='play'&&m.r===S.r&&!S.done[f]){
@@ -305,8 +307,17 @@ function imRes(){const c=tal(),mx=Math.max(...Object.values(c)),top=Object.keys(
 /* ---------- views ---------- */
 function vSign(){return `<h1>Hop In 🎈</h1><p>Party games for you and your mates. Free, and there’s no app to download.</p><div class=card><h3>Who are you?</h3><input id=nm maxlength=12 placeholder="Your name" value="${esc(tmp.n)}"><div class=row style="margin:8px 0">${EM.map(e=>`<button class="e ${e===tmp.e?'on':''}" data-a=em data-e="${e}">${e}</button>`).join('')}</div><button class=r data-a=signin>Right, let’s go</button></div>`}
 function vHome(){return `<h1>Hop In 🎈</h1>`+(peer||OPENING?'<p>Connecting…</p>':`<div class=card>${chip(me)}<button data-a=out style="width:auto;display:inline-block;padding:3px 10px;font-size:14px;box-shadow:none">not you?</button><button class=r data-a=host>Start a room</button><h3>Got a code?</h3><input id=cd maxlength=4 value="${esc(Q0)}" placeholder="CODE" style="text-align:center;letter-spacing:8px;text-transform:uppercase"><button class=t data-a=join>Join</button><button data-a=scan>📷 Scan a QR code</button><button class=r data-a=open>🌍 Join the open room</button><small>No code needed. Anyone on the site can hop in, so it’s good for mixing classes. Cameras go live to everyone in the room.</small></div>`+(err?`<div class=card>${esc(err)}</div>`:''))}
-function vLobby(){return `<h2>${S.c==='OPEN'?'Open room 🌍':'Room '+S.c}</h2><div class=card style="text-align:center"><div class=big>${S.c}</div><div id=qr style="display:inline-block;padding:8px;background:#fff;margin-top:10px"></div><br><small>${S.c==='OPEN'?'Other classes can join from the home screen with “Join the open room”. No code needed.':'Scan this, or type the code in at '+esc(location.host)}</small></div><div class=card><h3>Players (${N()})</h3>${S.p.map(p=>chip(p)+(host&&p.id!==id?`<button data-a=ban data-i="${p.id}" style="width:auto;display:inline-block;padding:2px 8px;font-size:13px;box-shadow:none">remove</button>`:'')).join('')}</div>`+
- (host?'<div class=card style="background:var(--sun)"><b>📷 The camera is automatic in Dare Duty, Live Charades, Punishment Roulette and Stone Face.</b><br><small>It switches on by itself on your turn (your browser asks for permission).</small></div>'+GM.map(g=>`<button data-a=go data-g=${g[0]} ${N()<3?'disabled':''}>${g[1]} ${g[2]}<br><small>${g[3]}</small></button>`).join('')+(N()<3?'<p><small>You need at least 3 people to start.</small></p>':''):'<p>📷 In Dare Duty, Live Charades, Punishment Roulette and Stone Face your camera switches on by itself on your turn.</p>'+'<p>The host is picking a game.</p>')}
+function vLobby(){return `<h2>${S.c==='OPEN'?'Open room 🌍':'Room '+S.c}</h2><div class=card style="text-align:center"><div class=big>${S.c}</div><div id=qr style="display:inline-block;padding:8px;background:#fff;margin-top:10px"></div><br><small>${S.c==='OPEN'?'Other classes can join from the home screen with “Join the open room”. No code needed.':'Scan this, or type the code in at '+esc(location.host)}</small></div><div class=card><h3>Players (${N()})</h3>${S.p.map(p=>chip(p)+(host&&p.id!==id?`<button data-a=ban data-i="${p.id}" style="width:auto;display:inline-block;padding:2px 8px;font-size:13px;box-shadow:none">remove</button>`:'')).join('')}</div>`+lobbyPick()}
+function lobbyPick(){
+ const cam='<div class=card style="background:var(--sun)"><b>📷 The camera is automatic in Dare Duty, Live Charades, Punishment Roulette and Stone Face.</b><br><small>It switches on by itself on your turn (your browser asks for permission).</small></div>';
+ if(S.c==='OPEN'){
+  const gv=S.gv||{},cnt={};Object.values(gv).forEach(g=>{cnt[g]=(cnt[g]||0)+1});const mine=gv[id],voted=S.p.filter(p=>gv[p.id]).length;
+  return cam+'<h3>Vote for the game 🗳️</h3>'+GM.map(g=>`<button class="${mine===g[0]?'r':''}" data-a=gv data-g=${g[0]}>${g[1]} ${g[2]} <b>(${cnt[g[0]]||0})</b> ${S.p.filter(p=>gv[p.id]===g[0]).map(p=>p.e).join('')}<br><small>${g[3]}</small></button>`).join('')+
+   `<p><small>${voted}/${N()} voted. You can change your vote. The most votes wins, and the game starts when everyone has voted${N()<3?'. You need at least 3 people':''}.</small></p>`+
+   (host?`<button class=t data-a=gvgo ${N()<3||!voted?'disabled':''}>Start the leading game now</button>`:'')}
+ return host?cam+GM.map(g=>`<button data-a=go data-g=${g[0]} ${N()<3?'disabled':''}>${g[1]} ${g[2]}<br><small>${g[3]}</small></button>`).join('')+(N()<3?'<p><small>You need at least 3 people to start.</small></p>':''):'<p>📷 In Dare Duty, Live Charades, Punishment Roulette and Stone Face your camera switches on by itself on your turn.</p><p>The host is picking a game.</p>'}
+function gvStart(){const c={};S.p.forEach(p=>{const g=(S.gv||{})[p.id];if(g)c[g]=(c[g]||0)+1});const mx=Math.max(0,...Object.values(c)),top=Object.keys(c).filter(k=>c[k]===mx);if(!top.length)return bcast();S.gv={};start(top[Math.random()*top.length|0])}
+function gvCheck(){const ps=S.p.filter(p=>!p.z);if(N()>=3&&ps.length&&ps.every(p=>(S.gv||{})[p.id]))return gvStart();bcast()}
 const show=x=>x.k==='i'&&x.v?`<img class=d src="${x.v}">`:`<h3>${esc(x.v||'…')}</h3>`;
 function vDp(){
  if(S.ph==='rev'){const b=S.books[S.i];return `<h2>Chain ${S.i+1} of ${N()}</h2>`+b.slice(0,S.j).map(x=>`<div class=card><span class=tag>${pName(x.by)}</span>${show(x)}</div>`).join('')+(host?`<button class=r data-a=nx>${S.j<b.length||S.i<N()-1?'Next':'Finish'}</button>`:'<p>The host is flicking through. Watch their screen.</p>')}
@@ -433,7 +444,7 @@ function render(){
  if(S.g==='sf'&&S.ph==='go'&&SFDW===S.t&&$('#cv'))return;
  shown=-1;qs=-1;cs=-1;
  const kp=['gs','pi','sft'].map(i=>{const e=$('#'+i);return e?{i,v:e.value,f:document.activeElement===e,k:i==='pi'||i==='sft'||GK===S.t}:null}).filter(Boolean);
- $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+(S.g?'':BKN)+'<p><small>build 19</small></p>';
+ $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+(S.g?'':BKN)+'<p><small>build 20</small></p>';
  if($('#qr')&&window.QRCode)new QRCode($('#qr'),{text:location.href.split(/[?#]/)[0]+'?room='+S.c,width:230,height:230,correctLevel:QRCode.CorrectLevel.L});
  if($('#cv'))initCv();
  GK=$('#gs')?S.t:-1;kp.forEach(o=>{const e=$('#'+o.i);if(e&&o.k){if(o.v)e.value=o.v;if(o.f){e.focus();try{e.setSelectionRange(e.value.length,e.value.length)}catch(x){}}}});ppBind();
@@ -491,7 +502,7 @@ const A={
  signin(){const n=$('#nm').value.trim();if(!n)return;me={n,e:tmp.e};try{localStorage.hop=JSON.stringify(me)}catch(e){}render();if(Q0&&ready()){join(Q0);render()}},
  out(){me=null;try{localStorage.removeItem('hop')}catch(e){}render()},
  host(){if(!ready())return;err='';startHost();render()},
- scan(){scanOpen()},
+ scan(){scanOpen()},gv(d){act({t:'gv',g:d.g})},gvgo(){act({t:'gvgo'})},
  open(){if(!ready())return;err='';OPENING=1;OT=0;join('OPEN');render()},ban(d){act({t:'kick',i:d.i,b:1})},
  xa(){const el=$('#pi');if(!el)return;const v=el.value.trim();if(!v)return;el.value='';act({t:'xa',v})},xr(d){act({t:'xr',i:+d.i})},xgo(){act({t:'xgo'})},xg(){act({t:'xg'})},xv(d){act({t:'xv',y:+d.y})},
  join(){const c=$('#cd').value.trim();if(c.length===4&&ready()){err='';join(c);render()}},
