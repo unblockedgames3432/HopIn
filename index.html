@@ -32,7 +32,20 @@ img.d{width:100%;border:3px solid var(--ink);border-radius:10px;display:block}
 .bar{height:20px;background:var(--blue);border:2px solid var(--ink);border-radius:6px;margin:6px 0}
 small{opacity:.75}
 #bkb{position:fixed;right:12px;bottom:12px;z-index:90;width:42px;height:42px;margin:0;padding:0;border-radius:50%;font-size:20px;text-align:center;opacity:.85;box-shadow:2px 2px 0 var(--ink)}
-#bkt{position:fixed;left:12px;right:68px;bottom:12px;z-index:91;background:var(--ink);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;font-size:15px}
+#app{padding-bottom:64px}
+#rxb{position:fixed;left:12px;bottom:12px;z-index:80;display:flex;gap:5px}#rxb[hidden]{display:none}
+#rxb button{width:42px;height:42px;margin:0;padding:0;font-size:20px;border-radius:50%;box-shadow:2px 2px 0 var(--ink);background:#fff}
+#fl{position:fixed;inset:0;z-index:85;pointer-events:none;overflow:hidden}
+.fx{position:absolute;bottom:70px;font-size:36px;line-height:1.1;text-align:center;animation:rise 2.1s ease-out forwards}
+.fx small{display:block;font-size:11px;font-weight:700;background:#fff;border:2px solid var(--ink);border-radius:8px;padding:0 5px;color:var(--ink);opacity:1}
+@keyframes rise{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(-20px) scale(1.1)}100%{transform:translateY(-320px) scale(1);opacity:0}}
+@media (prefers-reduced-motion:reduce){.fx{animation:none}}
+#cbtn{position:fixed;right:12px;bottom:62px;z-index:90;width:42px;height:42px;margin:0;padding:0;border-radius:50%;font-size:20px;text-align:center;box-shadow:2px 2px 0 var(--ink);background:#fff}
+#cbtn[hidden]{display:none}#cbtn b{position:absolute;top:-6px;right:-6px;background:var(--pink);color:#fff;border:2px solid var(--ink);border-radius:10px;font-size:11px;padding:0 5px;line-height:16px}#cbtn b:empty{display:none}
+#cp{position:fixed;left:0;right:0;bottom:0;z-index:95;background:#fff;color:var(--ink);border-top:3px solid var(--ink);padding:10px 12px max(10px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px}#cp[hidden]{display:none}
+#cl{overflow:auto;min-height:90px;max-height:34vh;font-size:15px}.cm{margin:4px 0;word-break:break-word}.cm.me{opacity:.8}
+#cp button{width:auto;margin:0;padding:6px 12px}
+#bkt{position:fixed;left:12px;right:68px;bottom:64px;z-index:91;background:var(--ink);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;font-size:15px}
 #bkt[hidden]{display:none}
 #bk{position:fixed;inset:0;z-index:100;background:#fff;color:#222;font:17px/1.6 Georgia,'Times New Roman',serif;overflow:auto;padding:max(22px,env(safe-area-inset-top)) 22px 40px}
 #bk[hidden]{display:none}#bk h2{font-family:Georgia,serif;font-size:24px;margin:0 0 4px;color:#222}#bk p{margin:.6em 0}#bk .pg{color:#555;font-size:14px;cursor:pointer;text-decoration:underline;margin-top:28px}
@@ -43,6 +56,8 @@ small{opacity:.75}
 @media (prefers-reduced-motion:reduce){.pop{animation:none}}
 #camw{max-width:480px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px 0}#camw video{width:100%;max-height:38vh;object-fit:cover;background:#000;border:3px solid var(--ink);border-radius:14px;box-shadow:6px 6px 0 var(--ink);display:block}#camt{font-weight:800;margin:8px 0 0}
 </style></head><body><div id=camw hidden><video id=rv autoplay playsinline></video><div id=camt></div></div><div id=app></div><button id=bkb aria-label="Hide the game" title="Hide the game (Esc)">🫣</button>
+<div id=fl></div><button id=cbtn data-a=chat hidden aria-label="Chat">💬<b id=cun></b></button>
+<div id=cp hidden><div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>💬 Chat</b><span><button id=cmt data-a=chatt hidden></button> <button data-a=chat>Close</button></span></div><div id=cl></div><div style="display:flex;gap:6px"><input id=cin maxlength=120 placeholder="Say something kind" autocomplete=off style="margin:0;flex:1;min-width:0"><button data-a=cs>Send</button></div><small>Keep it kind. In the open room, anyone in it can read this.</small></div><div id=rxb hidden><button data-a=rx data-e="👏" aria-label="Clap">👏</button><button data-a=rx data-e="😂" aria-label="Laugh">😂</button><button data-a=rx data-e="🔥" aria-label="Fire">🔥</button><button data-a=rx data-e="💀" aria-label="Dead">💀</button><button data-a=rx data-e="❤️" aria-label="Love">❤️</button></div>
 <div id=bkt hidden>🫣 Teacher coming? Tap the face, or press Esc, to hide the game.</div><div id=bk hidden><h2>Year 9 Maths: Fractions Revision</h2><p style="color:#555;margin-top:0">Worksheet 4B. Show your working for every question.</p><p>1. Simplify 18/24, then write it as a decimal.</p><p>2. Work out 2/3 + 3/5. Give your answer as a mixed number where you can.</p><p>3. A recipe needs 3/4 of a cup of flour for 6 muffins. How much flour is needed for 15 muffins?</p><p>4. Put these in order from smallest to largest: 5/8, 0.6, 7/12, 62%.</p><p>5. Explain why 7/9 is greater than 3/4 without using a calculator.</p><div class=pg id=bkx>Page 1 of 2</div></div>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -78,7 +93,12 @@ const WL=[['Dog','Eating spaghetti','Sleeping','Swimming','Brushing teeth','Cat'
 const GM=[['dp','🎨','Doodle Chain','Write something, draw it, guess it, pass it on. Gartic Phone style.'],['ml','👆','Most Likely To','Vote on who fits the prompt. You see who voted for who.'],['im','🕵️','Imposter','Same secret word for everyone except one bluffer. Send one-word clues, then vote them out.'],['qb','😂','Quip Battle','Everyone answers a daft prompt, then votes for the funniest.'],['sd','🥷','Dare Duty','One person at a time. Camera goes live on your turn, everyone judges. 8 levels, up to Mythic.'],['ch','🎭','Live Charades','Act a secret word on live camera, no talking. Everyone else types guesses. Gets harder every round.'],['pp','🎡','Punishment Roulette','Everyone writes punishments. Quick contests find the loser, who does a random one on live camera.'],['sf','🗿','Stone Face','Keep a straight face on live camera while the class types and draws their own ridiculous stuff onto your screen. Spot the crack to score. Silent, so it works in class.']];
 let L={};try{L=JSON.parse(localStorage.hop)||{}}catch(e){}
 let me=L.n?{n:L.n,e:L.e}:null,tmp={n:L.n||'',e:L.e||EM[0]},peer,conns={},host=false,hc,id,S={p:[]},T=null,W=null,B=[],IM={},OR=[],SP=[],LS=null,VS=null,CALLED={},CALLS=[],seen={},HT=0,U={},PV={},GEN=0,RT=0,tries=0,last=0,room='',rcn=0,q=[],cs=-1,cd=-1,uid=(()=>{try{return sessionStorage.hopuid||(sessionStorage.hopuid='u'+Math.random().toString(36).slice(2,10))}catch(e){return'u'+Math.random().toString(36).slice(2,10)}})(),shown=-1,qs=-1,qd=-1,myA='',QA={},QO=[],QPool=[],err='',col=COL[0];
-let CT=-1,CERR='',CW='',CP=[],GK=-1,PP=[],SUBS={},CS={t:-1},PPT=0,PQ=[],SFT=0,SFA={},SFV={t:-1,at:0},SFN='',SFDW=-1,OPENING=0,OT=0,BAN={};
+let CT=-1,CERR='',CW='',CP=[],GK=-1,PP=[],SUBS={},CS={t:-1},PPT=0,PQ=[],SFT=0,SFA={},SFV={t:-1,at:0},SFN='',SFDW=-1,OPENING=0,OT=0,BAN={},RXT={},CLOG=[],CMT={},CHAT=[],CH=0,CUN=0;
+const BADW=/\b(f+u+c+k+\w*|sh[i1]+t+\w*|b[i1]tch\w*|cunt\w*|d[i1]ck\w*|a+ss+h[o0]le\w*|bastard\w*|p[i1]ss\w*|sl[u]+t+\w*|wh[o0]re\w*)\b/gi;
+function drawChat(){const l=$('#cl');l.innerHTML=CHAT.map(x=>`<div class="cm${x.by===id?' me':''}"><b>${esc(x.e)} ${esc(x.n)}</b> ${esc(x.x)}</div>`).join('')||'<small>No messages yet. Say hi!</small>';l.scrollTop=l.scrollHeight}
+function chatUI(){const off=S.chat===false;$('#cbtn').hidden=!S.p.length||(off&&!host);$('#cmt').hidden=!host;$('#cmt').textContent=off?'Turn chat on':'Turn chat off';$('#cin').disabled=off;$('#cin').placeholder=off?'Chat is off':'Say something kind';if(!S.p.length)$('#cp').hidden=true}
+const RXE=['👏','😂','🔥','💀','❤️'];
+function floatRx(m){const c=$('#fl');if(!c||c.children.length>30)return;const p=S.p.find(p=>p.id===m.by),d=document.createElement('div');d.className='fx';d.style.left=(6+Math.random()*76)+'%';d.innerHTML=m.e+'<small>'+(p?esc(p.n):'')+'</small>';c.appendChild(d);setTimeout(()=>d.remove(),2200)}
 const R0=(()=>{try{return sessionStorage.hoproom||''}catch(e){return''}})();
 const Q0=(new URLSearchParams(location.search).get('room')||'').slice(0,4);
 const BKN='<div class=card style="background:var(--mint);padding:12px;margin:12px 0">🫣 <b>Teacher coming?</b> Tap the face in the bottom corner, or press Esc, to hide the game. Tap “Page 1 of 2” to come back.</div>';
@@ -94,6 +114,9 @@ function act(m){host?handle(id,m):hc&&hc.open?hc.send(m):q.push(m)}
 function recv(m){
  if(m.t==='hb')return;
  if(m.t==='ban')return fail('The host removed you from that room.');
+ if(m.t==='rxo')return floatRx(m);
+ if(m.t==='cmh'){CHAT=(m.l||[]).slice(-60);return drawChat()}
+ if(m.t==='cmo'){CHAT.push(m);CHAT=CHAT.slice(-60);drawChat();if(!CH&&m.by!==id){CUN++;$('#cun').textContent=CUN>9?'9+':CUN}return}
  if(m.t==='x')return fail('That game’s already running. Wait for the next one.');
  if(m.t==='S'){S=m.s;if(S.g!=='dp')T=null;if(!S.g)W=null;if(S.g!=='qb')qd=-1;if(S.g!=='im')cd=-1;if(S.g==='qb'&&S.ph==='ans'&&qd!==S.r)myA=''}
  else{if(m.t==='task')T=m;if(m.t==='word')W=m}
@@ -135,8 +158,11 @@ function handle(f,m){
  if(m.t==='hb')return;
  if(H0(f)&&m.t==='kick'&&m.i!==f){if(m.b)BAN[m.i]=1;return drop(m.i)}
  if(H0(f)&&m.t==='camset'){S.cam=S.cam?0:1;if(!S.cam)S.live=0;return bcast()}
- if(m.t==='join'){if(BAN[f])return send(f,{t:'ban'});const q0=S.p.find(p=>p.id===f);if(q0){q0.pi=m.pi;Object.values(PV[f]||{}).forEach(x=>send(f,x));return bcast()}if(S.g&&S.g!=='sd'&&S.g!=='ch'&&S.g!=='pp'&&S.g!=='sf')return send(f,{t:'x'});if(!S.p.some(p=>p.id===f)){S.p.push({id:f,n:String(m.n).slice(0,12),e:EM.includes(m.e)?m.e:'🙂',s:0,sk:2,st:0,pi:m.pi});if(S.g==='sd'||S.g==='ch'||S.g==='sf')OR.push(f);if(S.g==='sf'&&S.am)S.am[f]=3}return bcast()}
+ if(m.t==='join'){if(BAN[f])return send(f,{t:'ban'});const q0=S.p.find(p=>p.id===f);if(q0){q0.pi=m.pi;Object.values(PV[f]||{}).forEach(x=>send(f,x));return bcast()}if(S.g&&S.g!=='sd'&&S.g!=='ch'&&S.g!=='pp'&&S.g!=='sf')return send(f,{t:'x'});if(!S.p.some(p=>p.id===f)){S.p.push({id:f,n:String(m.n).slice(0,12),e:EM.includes(m.e)?m.e:'🙂',s:0,sk:2,st:0,pi:m.pi});if(S.g==='sd'||S.g==='ch'||S.g==='sf')OR.push(f);if(S.g==='sf'&&S.am)S.am[f]=3}if(CLOG.length)send(f,{t:'cmh',l:CLOG});return bcast()}
  const G=S.g,H=f===id;
+ if(m.t==='cm'&&S.chat!==false&&S.p.some(p=>p.id===f)&&Date.now()-(CMT[f]||0)>1200){const x=String(m.x||'').trim().slice(0,120).replace(BADW,'***');if(!x)return;CMT[f]=Date.now();const q=S.p.find(p=>p.id===f),o={t:'cmo',by:f,n:q.n,e:q.e,x};CLOG.push(o);CLOG=CLOG.slice(-40);S.p.forEach(p=>send(p.id,o));return}
+ if(H&&m.t==='chatt'){S.chat=S.chat===false;return bcast()}
+ if(m.t==='rx'&&RXE.includes(m.e)&&S.p.some(p=>p.id===f)&&Date.now()-(RXT[f]||0)>350){RXT[f]=Date.now();S.p.forEach(p=>send(p.id,{t:'rxo',e:m.e,by:f}));return}
  if(S.c==='OPEN'&&!G&&m.t==='gv'&&S.p.some(p=>p.id===f)&&GM.some(g=>g[0]===m.g)){(S.gv=S.gv||{})[f]=m.g;return gvCheck()}
  if(S.c==='OPEN'&&H&&!G&&m.t==='gvgo'&&N()>=3)return gvStart();
  if(H&&m.t==='go'&&!G&&N()>=3&&S.c!=='OPEN')return start(m.g);
@@ -444,10 +470,11 @@ function render(){
  if(S.g==='sf'&&S.ph==='go'&&SFDW===S.t&&$('#cv'))return;
  shown=-1;qs=-1;cs=-1;
  const kp=['gs','pi','sft'].map(i=>{const e=$('#'+i);return e?{i,v:e.value,f:document.activeElement===e,k:i==='pi'||i==='sft'||GK===S.t}:null}).filter(Boolean);
- $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+(S.g?'':BKN)+'<p><small>build 20</small></p>';
+ $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+(S.g?'':BKN)+'<p><small>build 22</small></p>';
  if($('#qr')&&window.QRCode)new QRCode($('#qr'),{text:location.href.split(/[?#]/)[0]+'?room='+S.c,width:230,height:230,correctLevel:QRCode.CorrectLevel.L});
  if($('#cv'))initCv();
  GK=$('#gs')?S.t:-1;kp.forEach(o=>{const e=$('#'+o.i);if(e&&o.k){if(o.v)e.value=o.v;if(o.f){e.focus();try{e.setSelectionRange(e.value.length,e.value.length)}catch(x){}}}});ppBind();
+ $('#rxb').hidden=!S.p.length;chatUI();
  if(S.p.length&&!BKT){BKT=1;const t=$('#bkt');t.hidden=false;setTimeout(()=>{t.hidden=true},8000)}
 }
 function initCv(){
@@ -502,7 +529,7 @@ const A={
  signin(){const n=$('#nm').value.trim();if(!n)return;me={n,e:tmp.e};try{localStorage.hop=JSON.stringify(me)}catch(e){}render();if(Q0&&ready()){join(Q0);render()}},
  out(){me=null;try{localStorage.removeItem('hop')}catch(e){}render()},
  host(){if(!ready())return;err='';startHost();render()},
- scan(){scanOpen()},gv(d){act({t:'gv',g:d.g})},gvgo(){act({t:'gvgo'})},
+ scan(){scanOpen()},chat(){CH=!CH;$('#cp').hidden=!CH;if(CH){CUN=0;$('#cun').textContent='';drawChat();setTimeout(()=>{try{$('#cin').focus()}catch(e){}},50)}},cs(){const el=$('#cin');if(!el||el.disabled)return;const v=el.value.trim();if(!v)return;el.value='';act({t:'cm',x:v})},chatt(){act({t:'chatt'})},rx(d){act({t:'rx',e:d.e})},gv(d){act({t:'gv',g:d.g})},gvgo(){act({t:'gvgo'})},
  open(){if(!ready())return;err='';OPENING=1;OT=0;join('OPEN');render()},ban(d){act({t:'kick',i:d.i,b:1})},
  xa(){const el=$('#pi');if(!el)return;const v=el.value.trim();if(!v)return;el.value='';act({t:'xa',v})},xr(d){act({t:'xr',i:+d.i})},xgo(){act({t:'xgo'})},xg(){act({t:'xg'})},xv(d){act({t:'xv',y:+d.y})},
  join(){const c=$('#cd').value.trim();if(c.length===4&&ready()){err='';join(c);render()}},
@@ -522,7 +549,7 @@ const A={
  clr(){const c=$('#cv'),x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,260,260)},
  sub(){const t=T;const v=t.k==='t'?($('#tx').value.trim()||'(blank)'):$('#cv').toDataURL('image/jpeg',.5);t.done=true;act({t:'sub',r:t.r,v});render()}
 };
-document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='gs')A.gs();else if(e.target.id==='pi')A.xa();else if(e.target.id==='sft')A.sfs()}});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='gs')A.gs();else if(e.target.id==='pi')A.xa();else if(e.target.id==='sft')A.sfs();else if(e.target.id==='cin')A.cs()}});
 let BK=0,BT=document.title,BKT=0;
 function bk(on){BK=on;const o=$('#bk');o.hidden=!on;document.title=on?'Fractions Revision':BT;if(on)o.scrollTop=0}
 $('#bkb').onclick=()=>bk(1);$('#bkx').onclick=()=>bk(0);
