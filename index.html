@@ -106,8 +106,9 @@ document.addEventListener('visibilitychange',()=>{if(document.hidden)return;wake
 function startHost(c0){
  wake();const code=c0||rc();host=true;peer=new Peer(PID(code));peer.on('call',onCall);
  peer.on('open',i=>{id=i;OPENING=0;S={g:null,ph:'lobby',c:code,cam:1,p:[{id,n:me.n,e:me.e,s:0,sk:2,st:0,pi:id}]};render();HT=setInterval(()=>{const t=Date.now();let ch=0;for(const k in conns)conns[k].open&&conns[k].send({t:'hb'});S.p.forEach(p=>{if(p.id===id)return;const idle=t-(seen[p.id]||t),z=idle>10000?1:0;if((p.z||0)!==z){p.z=z;ch=1}if(idle>120000)drop(p.id)});if(ch)bcast()},4000)});
+ peer.on('disconnected',()=>{try{peer.reconnect()}catch(e){}});
  peer.on('connection',c=>c.on('data',m=>{if(m.t==='join'){U[c.peer]=m.u?String(m.u).slice(0,24):c.peer;conns[U[c.peer]]=c;m.pi=c.peer}const f=U[c.peer];if(f)handle(f,m)}));
- peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();if(c0){host=false;peer=null;if(++OT>4)return fail('The open room is busy. Try again.');setTimeout(()=>{if(!peer&&!host&&me)join(c0)},600)}else startHost()}else fail('Connection dropped ('+e.type+'). Try again.')});
+ peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();if(c0){host=false;peer=null;if(++OT>4)return fail('The open room is busy. Try again.');setTimeout(()=>{if(!peer&&!host&&me)join(c0)},600)}else startHost()}else if(e.type==='peer-unavailable'||e.type==='webrtc'||e.type==='network'||e.type==='socket-error'||e.type==='socket-closed')return;else fail('Connection dropped ('+e.type+'). Try again.')});
 }
 function join(c){room=c.toUpperCase();tries=0;wake();link()}
 function link(){
@@ -410,7 +411,7 @@ function camUI(){
  if(!(on&&mine))CT=-1;else if(!LS&&CT!==S.t){CT=S.t;autoCam()}
  if(LS&&!(on&&mine)){LS.getTracks().forEach(t=>t.stop());LS=null;CALLED={};CALLS.forEach(c=>{try{c.close()}catch(e){}});CALLS=[]}
  if(VS&&!(on&&!mine))VS=null;
- if(LS&&S.live&&peer)S.p.forEach(p=>{if(p.id!==id&&p.pi&&!CALLED[p.pi]){CALLED[p.pi]=1;try{CALLS.push(peer.call(p.pi,LS))}catch(e){}}});
+ if(LS&&S.live&&peer)S.p.forEach(p=>{if(p.id!==id&&p.pi&&!p.z&&!CALLED[p.pi]){CALLED[p.pi]=1;try{CALLS.push(peer.call(p.pi,LS))}catch(e){}}});
  const w=$('#camw'),v=$('#rv'),src=LS||VS;if(!w||!v)return;
  w.hidden=!(on&&(src||S.live));
  if(v.srcObject!==src){v.srcObject=src;v.muted=!!LS;if(src&&v.play)v.play().catch(()=>{v.muted=true;v.play().catch(()=>{});$('#camt').textContent='🔴 Live. Tap the video for sound'})}
@@ -425,7 +426,7 @@ function render(){
  if(S.g==='sf'&&S.ph==='go'&&SFDW===S.t&&$('#cv'))return;
  shown=-1;qs=-1;cs=-1;
  const kp=['gs','pi','sft'].map(i=>{const e=$('#'+i);return e?{i,v:e.value,f:document.activeElement===e,k:i==='pi'||i==='sft'||GK===S.t}:null}).filter(Boolean);
- $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+'<p><small>build 16</small></p>';
+ $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+'<p><small>build 17</small></p>';
  if($('#qr')&&window.QRCode)new QRCode($('#qr'),{text:location.href.split(/[?#]/)[0]+'?room='+S.c,width:230,height:230,correctLevel:QRCode.CorrectLevel.L});
  if($('#cv'))initCv();
  GK=$('#gs')?S.t:-1;kp.forEach(o=>{const e=$('#'+o.i);if(e&&o.k){if(o.v)e.value=o.v;if(o.f){e.focus();try{e.setSelectionRange(e.value.length,e.value.length)}catch(x){}}}});ppBind();
