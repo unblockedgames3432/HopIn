@@ -31,6 +31,10 @@ canvas{width:100%;aspect-ratio:1;background:#fff;border:3px solid var(--ink);bor
 img.d{width:100%;border:3px solid var(--ink);border-radius:10px;display:block}
 .bar{height:20px;background:var(--blue);border:2px solid var(--ink);border-radius:6px;margin:6px 0}
 small{opacity:.75}
+.tmr{margin:8px 0}.tmrt{display:flex;justify-content:space-between;font-weight:700;margin-bottom:4px}
+.tmrb{height:14px;border:3px solid var(--ink);border-radius:10px;background:#fff;overflow:hidden}
+.tmrb i{display:block;height:100%;background:var(--sun);transition:width .25s linear}.tmr.low .tmrb i{background:var(--pink)}.tmr.low b{color:var(--pink)}
+.card ol{margin:6px 0 6px 20px;padding:0}.card li{margin:3px 0}
 #bkb{position:fixed;right:12px;bottom:12px;z-index:90;width:42px;height:42px;margin:0;padding:0;border-radius:50%;font-size:20px;text-align:center;opacity:.85;box-shadow:2px 2px 0 var(--ink)}
 #app{padding-bottom:64px}
 #bkt{position:fixed;left:12px;right:68px;bottom:12px;z-index:91;background:var(--ink);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;font-size:15px}
@@ -88,8 +92,11 @@ const chip=p=>`<span class=pl><span class=av>${p.e}</span>${esc(p.n)}${p.z?' �
 const tal=()=>{const c={};Object.values(S.v||{}).forEach(t=>c[t]=(c[t]||0)+1);return c};
 
 /* ---------- networking: host-authoritative over WebRTC (PeerJS free broker) ---------- */
+let TOFF=0,HW=0,HWG='',IMN=0,TMK='',TMT=0,RESTORE=null,TKO=0;
+const JOINABLE=['sd','ch','pp','sf','ml','qb'],HUI=()=>host&&S.c!=='OPEN',isSpec=()=>!!(S.sp&&S.sp.some(p=>p.id===id))&&!S.p.some(p=>p.id===id);
 const PID=c=>'hopin-party-'+c,rc=()=>[...Array(4)].map(()=>'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.random()*24|0]).join('');
-function bcast(){for(const k in conns)conns[k].open&&conns[k].send({t:'S',s:S});render()}
+function bcast(){if(!S.g&&S.sp&&S.sp.length){S.sp.forEach(q=>{if(!S.p.some(x=>x.id===q.id))S.p.push({id:q.id,n:q.n,e:q.e,s:0,sk:2,st:0,pi:q.pi})});S.sp=[]}
+ armTimer();for(const k in conns)conns[k].open&&conns[k].send({t:'S',s:S});render()}
 function send(to,m){if(to!==id&&(m.t==='task'||m.t==='word'))(PV[to]=PV[to]||{})[m.t]=m;to===id?recv(m):conns[to]&&conns[to].open&&conns[to].send(m)}
 function act(m){host?handle(id,m):hc&&hc.open?hc.send(m):q.push(m)}
 function recv(m){
@@ -97,14 +104,17 @@ function recv(m){
  if(m.t==='hb')return;
  if(m.t==='ban')return fail('The host removed you from that room.');
  if(m.t==='x')return fail('That game’s already running. Wait for the next one.');
- if(m.t==='S'){S=m.s;if(S.g!=='dp')T=null;if(!S.g)W=null;if(S.g!=='qb')qd=-1;if(S.g!=='im')cd=-1;if(S.g==='qb'&&S.ph==='ans'&&qd!==S.r)myA=''}
+ if(m.t==='S'){S=m.s;TOFF=(S.now||Date.now())-Date.now();if(S.g!=='dp')T=null;if(!S.g)W=null;if(S.g!=='qb')qd=-1;if(S.g!=='im')cd=-1;if(S.g==='qb'&&S.ph==='ans'&&qd!==S.r)myA=''}
  else{if(m.t==='task')T=m;if(m.t==='word')W=m}
  render();
 }
 function fail(m){OPENING=0;err=m;GEN++;clearInterval(HT);clearTimeout(RT);RT=0;rcn=0;room='';try{sessionStorage.removeItem('hoproom')}catch(e){}try{peer.destroy()}catch(e){}peer=null;hc=null;conns={};host=false;S={p:[]};T=W=null;shown=-1;qs=qd=cs=cd=-1;render()}
 const H0=f=>f===id;
 function ensureHost(){if(me&&!S.p.some(p=>p.id===id))S.p.unshift({id,n:me.n,e:me.e,s:0,sk:2,st:0,pi:id})}
-function drop(i){try{conns[i]&&conns[i].close()}catch(e){}delete conns[i];if(!S.p.some(p=>p.id===i))return;{const gp=S.p.find(p=>p.id===i);if(gp&&!BAN[i])GR[i]={s:gp.s,sk:gp.sk,st:gp.st,t:Date.now()}}S.p=S.p.filter(p=>p.id!==i);if(S.gv)delete S.gv[i];
+function drop(i){try{conns[i]&&conns[i].close()}catch(e){}delete conns[i];if(S.sp)S.sp=S.sp.filter(p=>p.id!==i);if(S.rp)delete S.rp[i];if(!S.p.some(p=>p.id===i))return;{const gp=S.p.find(p=>p.id===i);if(gp&&!BAN[i])GR[i]={s:gp.s,sk:gp.sk,st:gp.st,t:Date.now()}}S.p=S.p.filter(p=>p.id!==i);if(S.gv)delete S.gv[i];
+ if(S.g==='ml'&&N()>=2){delete S.v[i];if(S.ph==='vote'&&Object.keys(S.v).length>=N())return mlRes();return bcast()}
+ if(S.g==='qb'&&N()>=2){S.dn=S.dn.filter(x=>x!==i);delete QA[i];delete S.v[i];if(S.ph==='ans'&&S.dn.length>=N())return qVote();if(S.ph==='vote'&&Object.keys(S.v).length>=N())return qRes();return bcast()}
+ if(S.g==='im'&&N()>=3&&i!==IM.bad){delete S.cl[i];S.dn=S.dn.filter(x=>x!==i);delete S.v[i];if(S.ph==='clue'&&S.dn.length>=N())return imShow();if(S.ph==='vote'&&Object.keys(S.v).length>=N())return imRes();return bcast()}
  if(S.g==='pp'&&N()>=3){delete SUBS[i];delete S.v[i];if(S.pd)delete S.pd[i];if(S.who===i&&(S.ph==='pun'||S.ph==='res'))return ppAfter();if(S.ph==='play'){if(S.p.every(p=>p.id in SUBS))return ppResolve();return bcast()}if(S.ph==='pun')return ppVoteCheck();return bcast()}
  if(S.g==='ch'&&N()>=3){OR=OR.filter(x=>x!==i);if(S.who!==i)return bcast();if(S.t>=S.T)S.ph='end';else chNext();return bcast()}
  if(S.g==='sf'&&N()>=3){OR=OR.filter(x=>x!==i);if(S.cr)delete S.cr[i];if(S.am)delete S.am[i];if(S.who!==i)return sfCheck();clearTimeout(SFT);if(S.t>=S.T)S.ph='end';else sfNext();return bcast()}
@@ -114,10 +124,10 @@ const wake=()=>{try{navigator.wakeLock.request('screen').catch(()=>{})}catch(e){
 document.addEventListener('visibilitychange',()=>{if(document.hidden)return;wake();if(host&&peer&&peer.disconnected)try{peer.reconnect()}catch(e){}if(!host&&room){if(!hc||!hc.open){clearTimeout(RT);RT=0;link()}else hc.send({t:'hb'})}});
 function startHost(c0){
  wake();const code=c0||rc();host=true;peer=new Peer(PID(code));peer.on('call',onCall);
- peer.on('open',i=>{id=i;OPENING=0;S={g:null,ph:'lobby',c:code,cam:1,p:[{id,n:me.n,e:me.e,s:0,sk:2,st:0,pi:id}]};render();HT=setInterval(()=>{const t=Date.now();let ch=0;for(const k in conns)conns[k].open&&conns[k].send({t:'hb'});S.p.forEach(p=>{if(p.id===id)return;const idle=t-(seen[p.id]||t),z=idle>10000?1:0;if((p.z||0)!==z){p.z=z;ch=1}if(idle>300000)drop(p.id)});if(ch)bcast()},4000)});
+ peer.on('open',i=>{id=i;OPENING=0;TOFF=0;S=RESTORE?restoreS(RESTORE,code):{g:null,ph:'lobby',c:code,cam:1,p:[{id,n:me.n,e:me.e,s:0,sk:2,st:0,pi:id}]};if(RESTORE)S.p.forEach(q=>{seen[q.id]=Date.now()});RESTORE=null;render();HT=setInterval(()=>{const t=Date.now();let ch=0;for(const k in conns)conns[k].open&&conns[k].send({t:'hb'});S.p.forEach(p=>{if(p.id===id)return;const idle=t-(seen[p.id]||t),z=idle>10000?1:0;if((p.z||0)!==z){p.z=z;ch=1}if(idle>300000)drop(p.id)});if(ch)bcast()},4000)});
  peer.on('disconnected',()=>{try{peer.reconnect()}catch(e){}});
  peer.on('connection',c=>c.on('data',m=>{if(m&&m.t==='~peek'){try{c.send({t:'~peek',n:N()})}catch(e){}return}if(m.t==='join'){U[c.peer]=m.u?String(m.u).slice(0,24):c.peer;conns[U[c.peer]]=c;m.pi=c.peer}const f=U[c.peer];if(f)handle(f,m)}));
- peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();if(c0){host=false;peer=null;if(++OT>4)return fail('The open room is busy. Try again.');setTimeout(()=>{if(!peer&&!host&&me)join(c0)},600)}else startHost()}else if(e.type==='peer-unavailable'||e.type==='webrtc'||e.type==='network'||e.type==='socket-error'||e.type==='socket-closed')return;else fail('Connection dropped ('+e.type+'). Try again.')});
+ peer.on('error',e=>{if(e.type==='unavailable-id'){peer.destroy();if(c0){RESTORE=null;host=false;peer=null;if(++OT>4)return fail('The open room is busy. Try again.');setTimeout(()=>{if(!peer&&!host&&me)join(c0)},600)}else startHost()}else if(e.type==='peer-unavailable'||e.type==='webrtc'||e.type==='network'||e.type==='socket-error'||e.type==='socket-closed')return;else fail('Connection dropped ('+e.type+'). Try again.')});
 }
 function join(c){room=c.toUpperCase();tries=0;wake();link()}
 function link(){
@@ -127,9 +137,35 @@ function link(){
   hc.on('open',()=>{if(g!==GEN)return;OPENING=0;tries=0;rcn=0;last=Date.now();hc.send({t:'join',n:me.n,e:me.e,u:uid});while(q.length)hc.send(q.shift());HT=setInterval(()=>{hc.open&&hc.send({t:'hb'});if(!document.hidden&&Date.now()-last>15000)reco()},3000);try{sessionStorage.hoproom=room}catch(e){}if(S.p.length)render()});
   hc.on('data',m=>{if(g===GEN){last=Date.now();recv(m)}});
   hc.on('close',()=>{if(g===GEN)reco()})});
- peer.on('error',e=>{if(g!==GEN)return;if(OPENING&&!S.p.length&&e.type==='peer-unavailable'){GEN++;try{peer.destroy()}catch(x){}peer=null;hc=null;room='';if(++OT>4)return fail('Couldn’t open the room. Try again.');return startHost('OPEN')}if(!S.p.length)fail(e.type==='peer-unavailable'?'Can’t find that room. Check the code.':'Connection dropped ('+e.type+'). Try again.');else reco()});
+ peer.on('error',e=>{if(g!==GEN)return;if(OPENING&&!S.p.length&&e.type==='peer-unavailable'){GEN++;try{peer.destroy()}catch(x){}peer=null;hc=null;room='';if(++OT>4)return fail('Couldn’t open the room. Try again.');return startHost('OPEN')}if(!S.p.length)fail(e.type==='peer-unavailable'?'Can’t find that room. Check the code.':'Connection dropped ('+e.type+'). Try again.');else if(e.type==='peer-unavailable'&&room==='OPEN')scheduleTakeover();else reco()});
 }
+const restoreS=(l,code)=>{const mine=(l.p||[]).find(p=>p.id===uid)||{},ps=(l.p||[]).filter(p=>p.id!==uid&&p.id!==id).map(p=>({...p,z:0}));ps.unshift({id,n:me.n,e:me.e,s:mine.s||0,sk:mine.sk==null?2:mine.sk,st:mine.st||0,pi:id});return{g:null,ph:'lobby',c:code,cam:1,gv:{},p:ps,sp:[]}};
+function scheduleTakeover(){if(TKO||host)return;rcn=1;render();const ix=Math.max(0,S.p.findIndex(p=>p.id===uid));TKO=setTimeout(()=>{TKO=0;if(host||room!=='OPEN')return;takeOver()},500+ix*1800)}
+function takeOver(){RESTORE=S;OT=0;GEN++;clearInterval(HT);clearTimeout(RT);RT=0;try{peer&&peer.destroy()}catch(e){}peer=null;hc=null;room='';rcn=0;startHost('OPEN')}
 function reco(){if(host||RT||!room)return;rcn=1;render();RT=setTimeout(()=>{RT=0;if(++tries>20)return fail('Lost the connection. Try joining again.');link()},2500)}
+
+/* ---------- timers: every phase has a visible countdown and moves on by itself ---------- */
+function tinfo(){
+ const g=S.g,ph=S.ph,hh=m=>()=>handle(id,m),toLobby=()=>{S.g=null;S.ph='lobby';S.gv={};bcast()};
+ if(!g){if(S.c==='OPEN'&&N()>=3&&S.gv&&Object.keys(S.gv).length)return['lobby',25,'Game starts in',()=>{if(N()>=3)gvStart();else{TMK='';bcast()}}];return null}
+ const k=(...a)=>g+':'+ph+':'+a.join('.');
+ if(ph==='end')return[k(),20,'Back to the lobby in',toLobby];
+ if(g==='dp'){if(ph==='play')return[k(S.r),S.r%2?60:30,S.r%2?'Time left to draw':'Time left to write',hh({t:'skip'})];if(ph==='rev')return[k(S.i,S.j),7,'Next card in',hh({t:'nx'})]}
+ if(g==='ml'){if(ph==='vote')return[k(S.r),20,'Time left to vote',()=>Object.keys(S.v).length?mlRes():handle(id,{t:'nx'})];if(ph==='res')return[k(S.r),8,'Next round in',hh({t:'nx'})]}
+ if(g==='im'){if(ph==='clue')return[k(S.k),25,'Time left for your clue',hh({t:'skip'})];if(ph==='show')return[k(S.k),8,'Voting starts in',hh({t:'tv'})];
+  if(ph==='vote')return[k(S.k),25,'Time left to vote',()=>Object.keys(S.v).length?imRes():(IMN>=4?toLobby():(imNew(),bcast()))];if(ph==='res')return[k(S.k),10,'Next round in',hh({t:'nx'})]}
+ if(g==='qb'){if(ph==='ans')return[k(S.r),30,'Time left to answer',hh({t:'skip'})];if(ph==='vote')return[k(S.r),20,'Time left to vote',()=>qRes()];if(ph==='res')return[k(S.r),8,'Next question in',hh({t:'nx'})]}
+ if(g==='sd'){if(ph==='go')return S.cp?[k('c',S.t),15,'Votes close in',hh({t:'ev'})]:[k('d',S.t),60,'Time left for the dare',hh({t:'ev'})];if(ph==='res')return[k(S.t),7,'Next dare in',hh({t:'nx'})]}
+ if(g==='ch'){if(ph==='go')return[k(S.t),60,'Time left to guess',hh({t:'ev'})];if(ph==='res')return[k(S.t),6,'Next round in',hh({t:'nx'})]}
+ if(g==='sf'){if(ph==='go')return S.on?[k('on',S.t),S.dur,'Straight face for',null]:[k('w',S.t),25,'Waiting for the camera. Skipping in',hh({t:'sfskip'})];if(ph==='res')return[k(S.t),6,'Next face in',hh({t:'nx'})]}
+ if(g==='pp'){if(ph==='mk')return[k('mk'),45,'Punishments close in',hh({t:'xgo'})];if(ph==='play')return[k(S.t),15,'Time left in the contest',hh({t:'ev'})];if(ph==='pun')return[k(S.t),45,'Time left for the punishment',hh({t:'ev'})];if(ph==='res')return[k(S.t),6,'Next round in',hh({t:'nx'})]}
+ return null}
+function armTimer(){
+ if(!host)return;const ti=tinfo();S.now=Date.now();
+ if(!ti){clearTimeout(TMT);TMK='';S.dl=0;S.dt=0;S.tl='';return}
+ const[key,sec,label,act]=ti;
+ if(key!==TMK){TMK=key;clearTimeout(TMT);S.dl=Date.now()+sec*1000;S.dt=sec*1000;S.tl=label;
+  if(act)TMT=setTimeout(()=>{if(TMK!==key)return;try{act()}catch(e){}if(TMK===key){TMK='';bcast()}},sec*1000+150)}}
 
 /* ---------- host game logic ---------- */
 function handle(f,m){
@@ -138,8 +174,9 @@ function handle(f,m){
  if(m.t==='hb')return;
  if(H0(f)&&m.t==='kick'&&m.i!==f){if(m.b)BAN[m.i]=1;return drop(m.i)}
  if(H0(f)&&m.t==='camset'){S.cam=S.cam?0:1;if(!S.cam)S.live=0;return bcast()}
- if(m.t==='join'){if(BAN[f])return send(f,{t:'ban'});const q0=S.p.find(p=>p.id===f);if(q0){q0.pi=m.pi;Object.values(PV[f]||{}).forEach(x=>send(f,x));return bcast()}if(S.g&&S.g!=='sd'&&S.g!=='ch'&&S.g!=='pp'&&S.g!=='sf')return send(f,{t:'x'});if(!S.p.some(p=>p.id===f)){S.p.push({id:f,n:String(m.n).slice(0,12),e:EM.includes(m.e)?m.e:'🙂',s:0,sk:2,st:0,pi:m.pi});if(S.g==='sd'||S.g==='ch'||S.g==='sf')OR.push(f);if(S.g==='sf'&&S.am)S.am[f]=3;const gr=GR[f];if(gr&&Date.now()-gr.t<1800000){const np=S.p.find(p=>p.id===f);np.s=gr.s;np.sk=gr.sk;np.st=gr.st;delete GR[f]}}return bcast()}
+ if(m.t==='join'){if(BAN[f])return send(f,{t:'ban'});const q0=S.p.find(p=>p.id===f);if(q0){q0.pi=m.pi;Object.values(PV[f]||{}).forEach(x=>send(f,x));return bcast()}if(S.g&&!JOINABLE.includes(S.g)){S.sp=S.sp||[];if(!S.sp.some(q=>q.id===f))S.sp.push({id:f,n:String(m.n).slice(0,12),e:EM.includes(m.e)?m.e:EM[0],pi:m.pi});return bcast()}if(!S.p.some(p=>p.id===f)){S.p.push({id:f,n:String(m.n).slice(0,12),e:EM.includes(m.e)?m.e:'🙂',s:0,sk:2,st:0,pi:m.pi});if(S.g==='sd'||S.g==='ch'||S.g==='sf')OR.push(f);if(S.g==='sf'&&S.am)S.am[f]=3;const gr=GR[f];if(gr&&Date.now()-gr.t<1800000){const np=S.p.find(p=>p.id===f);np.s=gr.s;np.sk=gr.sk;np.st=gr.st;delete GR[f]}}return bcast()}
  const G=S.g,H=f===id;
+ if(S.c==='OPEN'&&m.t==='rp'&&S.p.some(p=>p.id===f)&&m.i!==f&&m.i!==id&&S.p.some(p=>p.id===m.i)){const r=(S.rp=S.rp||{}),a=(r[m.i]=r[m.i]||[]);if(!a.includes(f))a.push(f);if(a.length>=Math.max(2,Math.ceil(N()/2))){BAN[m.i]=1;delete r[m.i];return drop(m.i)}return bcast()}
  if(S.c==='OPEN'&&!G&&m.t==='gv'&&S.p.some(p=>p.id===f)&&GM.some(g=>g[0]===m.g)){(S.gv=S.gv||{})[f]=m.g;return gvCheck()}
  if(S.c==='OPEN'&&H&&!G&&m.t==='gvgo'&&N()>=3)return gvStart();
  if(H&&m.t==='go'&&!G&&N()>=3&&S.c!=='OPEN')return start(m.g);
@@ -223,13 +260,13 @@ function handle(f,m){
   if(H&&m.t==='skip'&&S.ph==='clue'){S.p.forEach(p=>{if(!S.dn.includes(p.id)){(S.cl[p.id]=S.cl[p.id]||[]).push('…');S.dn.push(p.id)}});return imShow()}
   if(H&&m.t==='more'&&S.ph==='show'&&S.cr<2){S.cr++;S.k++;S.ph='clue';S.dn=[];return bcast()}
   if(H&&m.t==='tv'&&S.ph==='show'){S.ph='vote';S.v={};return bcast()}
-  if(H&&m.t==='nx'&&S.ph==='res'){imNew();return bcast()}
+  if(H&&m.t==='nx'&&S.ph==='res'){if(IMN>=4){S.g=null;S.ph='lobby'}else imNew();return bcast()}
  }
 }
 function start(g){PV={};GR={};ensureHost();S.kk='';S.cam=1;S.g=g;S.v={};
  if(g==='dp'){B=S.p.map(()=>[]);S.r=0;S.ph='play';dpTasks()}
  if(g==='ml'){S.r=0;mlNext()}
- if(g==='im')imNew();
+ if(g==='im'){IMN=0;imNew()}
  if(g==='sd'){S.p.forEach(p=>{p.s=0;p.sk=2;p.st=0});OR=S.p.map(p=>p.id).sort(()=>Math.random()-.5);SP=SD.map(a=>[...a].sort(()=>Math.random()-.5));S.t=0;S.T=N()*Math.max(2,Math.ceil(18/N()));sdNext()}
  if(g==='ch'){S.p.forEach(p=>{p.s=0;p.sk=2;p.st=0});OR=S.p.map(p=>p.id).sort(()=>Math.random()-.5);CP=WL.map(a=>[...a].sort(()=>Math.random()-.5));S.t=0;S.T=N()*Math.max(2,Math.ceil(16/N()));chNext()}
  if(g==='sf'){clearTimeout(SFT);S.p.forEach(p=>{p.s=0;p.sk=2;p.st=0});OR=S.p.map(p=>p.id).sort(()=>Math.random()-.5);S.t=0;S.T=N()*Math.max(1,Math.ceil(9/N()));sfNext()}
@@ -303,7 +340,7 @@ function qVote(){QO=Object.keys(QA).map(k=>({by:k,t:QA[k]})).sort(()=>Math.rando
 function qRes(){S.res=QO.map((x,i)=>({t:x.t,by:x.by,vs:Object.keys(S.v).filter(v=>S.v[v]===i)}));S.res.forEach(x=>{const p=S.p.find(p=>p.id===x.by);if(p)p.s+=x.vs.length});S.ph='res';bcast()}
 function mlNext(){S.ph='vote';S.v={};S.r++;S.q=Q[Math.random()*Q.length|0]}
 function mlRes(){const c=tal(),mx=Math.max(...Object.values(c));S.p.forEach(p=>{if(c[p.id]===mx)p.s++});S.ph='res';bcast()}
-function imNew(){S.g='im';S.ph='clue';S.v={};S.dn=[];S.cl={};S.cr=1;S.k=(S.k||0)+1;const w=WD[Math.random()*WD.length|0],bad=S.p[Math.random()*N()|0].id;IM={bad,w};S.p.forEach(p=>send(p.id,{t:'word',w:p.id===bad?null:w}))}
+function imNew(){IMN++;S.g='im';S.ph='clue';S.v={};S.dn=[];S.cl={};S.cr=1;S.k=(S.k||0)+1;const w=WD[Math.random()*WD.length|0],bad=S.p[Math.random()*N()|0].id;IM={bad,w};S.p.forEach(p=>send(p.id,{t:'word',w:p.id===bad?null:w}))}
 function imShow(){S.ph='show';bcast()}
 function imRes(){const c=tal(),mx=Math.max(...Object.values(c)),top=Object.keys(c).filter(k=>c[k]===mx),caught=top.length===1&&top[0]===IM.bad;
  S.p.forEach(p=>{if(caught&&p.id!==IM.bad)p.s++;if(!caught&&p.id===IM.bad)p.s+=2});S.bad=IM.bad;S.w=IM.w;S.caught=caught;S.ph='res';bcast()}
@@ -311,50 +348,50 @@ function imRes(){const c=tal(),mx=Math.max(...Object.values(c)),top=Object.keys(
 /* ---------- views ---------- */
 function vSign(){return `<h1>Hop In 🎈</h1><p>Party games for you and your mates. Free, and there’s no app to download.</p><div class=card><h3>Who are you?</h3><input id=nm maxlength=12 placeholder="Your name" value="${esc(tmp.n)}"><div class=row style="margin:8px 0">${EM.map(e=>`<button class="e ${e===tmp.e?'on':''}" data-a=em data-e="${e}">${e}</button>`).join('')}</div><button class=r data-a=signin>Right, let’s go</button></div>`}
 function vHome(){return `<h1>Hop In 🎈</h1>`+(peer||OPENING?'<p>Connecting…</p>':`<div class=card>${chip(me)}<button data-a=out style="width:auto;display:inline-block;padding:3px 10px;font-size:14px;box-shadow:none">not you?</button><button class=r data-a=host>Start a room</button><h3>Got a code?</h3><input id=cd maxlength=4 value="${esc(Q0)}" placeholder="CODE" style="text-align:center;letter-spacing:8px;text-transform:uppercase"><button class=t data-a=join>Join</button><button data-a=scan>📷 Scan a QR code</button><button class=r data-a=open>🌍 Join the open room</button>${window.ORN==null?'':`<p style="margin:6px 0"><b>${window.ORN?window.ORN+(window.ORN===1?' player is':' players are')+' in the open room now':'Nobody is in the open room yet. Tap to start it.'}</b></p>`}<small>No code needed. Anyone on the site can hop in, so it’s good for mixing classes. Cameras go live to everyone in the room.</small></div>`+(err?`<div class=card>${esc(err)}</div>`:''))}
-function vLobby(){return `<h2>${S.c==='OPEN'?'Open room 🌍':'Room '+S.c}</h2><div class=card style="text-align:center"><div class=big>${S.c}</div><div id=qr style="display:inline-block;padding:8px;background:#fff;margin-top:10px"></div><br><small>${S.c==='OPEN'?'Other classes can join from the home screen with “Join the open room”. No code needed.':'Scan this, or type the code in at '+esc(location.host)}</small></div><div class=card><h3>Players (${N()})</h3>${S.p.map(p=>chip(p)+(host&&p.id!==id?`<button data-a=ban data-i="${p.id}" style="width:auto;display:inline-block;padding:2px 8px;font-size:13px;box-shadow:none">remove</button>`:'')).join('')}</div>`+lobbyPick()}
+function vLobby(){return `<h2>${S.c==='OPEN'?'Open room 🌍':'Room '+S.c}</h2><div class=card style="text-align:center"><div class=big>${S.c}</div><div id=qr style="display:inline-block;padding:8px;background:#fff;margin-top:10px"></div><br><small>${S.c==='OPEN'?'Other classes can join from the home screen with “Join the open room”. No code needed.':'Scan this, or type the code in at '+esc(location.host)}</small></div><div class=card><h3>Players (${N()})</h3>${S.p.map(p=>chip(p)+(S.c==='OPEN'&&p.id!==id&&p.id!==PID('OPEN')?`<button data-a=rp data-i="${p.id}" title="Flag this player. If most players flag them, they’re removed." style="width:auto;display:inline-block;padding:2px 8px;font-size:13px;box-shadow:none">🚩${(S.rp&&S.rp[p.id]||[]).length||''}</button>`:'')+(HUI()&&p.id!==id?`<button data-a=ban data-i="${p.id}" style="width:auto;display:inline-block;padding:2px 8px;font-size:13px;box-shadow:none">remove</button>`:'')).join('')}</div>`+lobbyPick()}
 function lobbyPick(){
  const cam='<div class=card style="background:var(--sun)"><b>📷 The camera is automatic in Dare Duty, Live Charades, Punishment Roulette and Stone Face.</b><br><small>It switches on by itself on your turn (your browser asks for permission).</small></div>';
  if(S.c==='OPEN'){
   const gv=S.gv||{},cnt={};Object.values(gv).forEach(g=>{cnt[g]=(cnt[g]||0)+1});const mine=gv[id],voted=S.p.filter(p=>gv[p.id]).length;
-  return cam+'<h3>Vote for the game 🗳️</h3>'+GM.map(g=>`<button class="${mine===g[0]?'r':''}" data-a=gv data-g=${g[0]}>${g[1]} ${g[2]} <b>(${cnt[g[0]]||0})</b> ${S.p.filter(p=>gv[p.id]===g[0]).map(p=>p.e).join('')}<br><small>${g[3]}</small></button>`).join('')+
+  return `<div class=card style="background:var(--mint)"><b>🌍 No host in this room.</b><br><small>Vote for a game below. It starts when everyone has voted, or 25 seconds after the first vote (3 or more players needed). Games run on timers and move on by themselves. You can join most games halfway through. 🚩 flags a player, and if most players flag them they’re removed.</small></div>`+tmrHtml()+cam+'<h3>Vote for the game 🗳️</h3>'+GM.map(g=>`<button class="${mine===g[0]?'r':''}" data-a=gv data-g=${g[0]}>${g[1]} ${g[2]} <b>(${cnt[g[0]]||0})</b> ${S.p.filter(p=>gv[p.id]===g[0]).map(p=>p.e).join('')}<br><small>${g[3]}</small></button>`).join('')+
    `<p><small>${voted}/${N()} voted. You can change your vote. The most votes wins, and the game starts when everyone has voted${N()<3?'. You need at least 3 people':''}.</small></p>`+
-   (host?`<button class=t data-a=gvgo ${N()<3||!voted?'disabled':''}>Start the leading game now</button>`:'')}
- return host?cam+GM.map(g=>`<button data-a=go data-g=${g[0]} ${N()<3?'disabled':''}>${g[1]} ${g[2]}<br><small>${g[3]}</small></button>`).join('')+(N()<3?'<p><small>You need at least 3 people to start.</small></p>':''):'<p>📷 In Dare Duty, Live Charades, Punishment Roulette and Stone Face your camera switches on by itself on your turn.</p><p>The host is picking a game.</p>'}
+   (HUI()?`<button class=t data-a=gvgo ${N()<3||!voted?'disabled':''}>Start the leading game now</button>`:'')}
+ return HUI()?cam+GM.map(g=>`<button data-a=go data-g=${g[0]} ${N()<3?'disabled':''}>${g[1]} ${g[2]}<br><small>${g[3]}</small></button>`).join('')+(N()<3?'<p><small>You need at least 3 people to start.</small></p>':''):'<p>📷 In Dare Duty, Live Charades, Punishment Roulette and Stone Face your camera switches on by itself on your turn.</p><p>The host is picking a game.</p>'}
 function gvStart(){const c={};S.p.forEach(p=>{const g=(S.gv||{})[p.id];if(g)c[g]=(c[g]||0)+1});const mx=Math.max(0,...Object.values(c)),top=Object.keys(c).filter(k=>c[k]===mx);if(!top.length)return bcast();S.gv={};start(top[Math.random()*top.length|0])}
 function gvCheck(){const ps=S.p.filter(p=>!p.z);if(N()>=3&&ps.length&&ps.every(p=>(S.gv||{})[p.id]))return gvStart();bcast()}
 const show=x=>x.k==='i'&&x.v?`<img class=d src="${x.v}">`:`<h3>${esc(x.v||'…')}</h3>`;
 function vDp(){
- if(S.ph==='rev'){const b=S.books[S.i];return `<h2>Chain ${S.i+1} of ${N()}</h2>`+b.slice(0,S.j).map(x=>`<div class=card><span class=tag>${pName(x.by)}</span>${show(x)}</div>`).join('')+(host?`<button class=r data-a=nx>${S.j<b.length||S.i<N()-1?'Next':'Finish'}</button>`:'<p>The host is flicking through. Watch their screen.</p>')}
- if(!T||T.r!==S.r||T.done)return `<h2>Waiting on everyone</h2><div class=card>${S.p.map(p=>chip(p)+(S.done[p.id]?'✅':'✏️')).join('<br>')}</div>`+(host?'<button data-a=skip>Skip whoever’s stuck</button>':'');
+ if(S.ph==='rev'){const b=S.books[S.i];return `<h2>Chain ${S.i+1} of ${N()}</h2>`+b.slice(0,S.j).map(x=>`<div class=card><span class=tag>${pName(x.by)}</span>${show(x)}</div>`).join('')+(HUI()?`<button class=r data-a=nx>${S.j<b.length||S.i<N()-1?'Next':'Finish'}</button>`:'<p>The host is flicking through. Watch their screen.</p>')}
+ if(!T||T.r!==S.r||T.done)return `<h2>Waiting on everyone</h2><div class=card>${S.p.map(p=>chip(p)+(S.done[p.id]?'✅':'✏️')).join('<br>')}</div>`+(HUI()?'<button data-a=skip>Skip whoever’s stuck</button>':'');
  const w=T.k==='t';shown=T.r;
  return `<span class=tag>Step ${T.r+1} of ${N()}</span>`+(T.r===0?'<h2>Write something for the next person to draw</h2><p>The weirder the better.</p>':w?`<h2>What’s this meant to be?</h2><div class=card>${show(T.prev)}</div>`:`<h2>Draw this</h2><div class=card>${show(T.prev)}</div>`)+
  (w?`<input id=tx maxlength=80 placeholder="${T.r?'What do you see?':'a cat riding a shark'}"><button class=r data-a=sub>Done</button>`:`<canvas id=cv width=260 height=260></canvas><div class=sw>${COL.map(c=>`<b data-a=col data-c="${c}" style="background:${c}"></b>`).join('')}</div><button data-a=clr style="width:auto;display:inline-block">Clear</button><button class=r data-a=sub>Done</button>`)}
 function vMl(){
  if(S.ph==='vote')return `<span class=tag>Round ${S.r} of 6</span><h2>Who’s most likely to…</h2><div class=card><h3>${S.q}</h3></div>`+(S.v[id]?`<p>Vote sent. ${Object.keys(S.v).length}/${N()} voted.</p>`:S.p.filter(p=>p.id!==id).map(p=>`<button data-a=vote data-i="${p.id}">${p.e} ${esc(p.n)}</button>`).join(''));
- return `<h2>…${S.q}</h2>`+vres()+(host?`<button class=r data-a=nx>${S.r>=6?'Finish':'Next'}</button>`:'')}
+ return `<h2>…${S.q}</h2>`+vres()+(HUI()?`<button class=r data-a=nx>${S.r>=6?'Finish':'Next'}</button>`:'')}
 function vSd(){
  if(S.ph==='end'){const mx=Math.max(...S.p.map(p=>p.s));return `<h2>🏆 ${S.p.filter(p=>p.s===mx).map(p=>p.e+' '+esc(p.n)).join(' & ')}</h2><p>Won with ${mx} point${mx===1?'':'s'}.</p>`}
  const mine=S.who===id,dr=S.p.find(p=>p.id===S.who)||{sk:0},w=pName(S.who),nv=N()-1,got=Object.keys(S.v).length,
  tg=`<span class=tag>Dare ${S.t} of ${S.T}: ${LV[S.lv-1]}</span>`,
  card=`<div class=card style="background:var(--pink);text-align:center"><span class=tag>${w}</span><h2>${esc(S.d)}</h2></div>`,
- hb=host&&(!mine||S.cp)?(S.cp?'<button class=t data-a=ev>Count the votes now</button>':'<button class=t data-a=ev>Time’s up, count it as a fail</button>'):'',
+ hb=HUI()&&(!mine||S.cp)?(S.cp?'<button class=t data-a=ev>Count the votes now</button>':'<button class=t data-a=ev>Time’s up, count it as a fail</button>'):'',
  cb=mine?(LS?'':CERR?`<p>${esc(CERR)}</p><button data-a=camretry>📷 Try camera again</button>`:'<p><small>📷 Starting your camera…</small></p>'):'';
  if(S.ph==='go'){
   if(mine)return tg+card+(S.cp?`<p>The others have been told. Waiting on their votes (${got}/${nv}).</p>`:`<p>That’s your dare and everyone can see it. Pull it off for +${S.lv}, or chicken out and lose 1.</p><button class=r data-a=sdd>✅ Completed</button><button data-a=sdc>🐔 Chicken out (-1)</button><button data-a=sdk ${dr.sk?'':'disabled'}>⏭ Skip it (${dr.sk} left)</button><p><small>Win 3 in a row to earn a skip. You can hold 4 at most.</small></p>`)+cb+hb;
   const vv=S.v[id];
   return tg+card+(S.cp?`<div class=card style="background:var(--mint)"><b>${w} says they’ve completed it.</b> Make your call.</div>`:`<p>Watch ${w}. Vote when you’re sure. You can change it.</p>`)+`<button class="${vv===1?'r':''}" data-a=sv data-y="1">✔ They did it</button><button class="${vv===0?'r':''}" data-a=sv data-y="0">✖ They didn’t</button><p><small>${got}/${nv} voted</small></p>`+hb+'<p><small>Keep it safe: no climbing on stuff, no touching people, and stop if a teacher says so.</small></p>'}
- const o=S.out;return tg+card+`<h2>${o.ok?'They did it!':'Bottled it'}</h2><p>${o.why==='chicken'?'Chickened out.':o.why==='time'?'Ran out of time.':o.y+' said yes, '+o.n+' said no.'} <b>${o.pts>0?'+'+o.pts:o.pts}</b> for ${w}.</p>`+(o.bonus?`<p>🎉 ${w} earned a skip for 3 in a row.</p>`:'')+(host?`<button class=r data-a=nx>${S.t>=S.T?'Final scores':'Next dare'}</button><button data-a=fin>End the game now</button>`:'')}
+ const o=S.out;return tg+card+`<h2>${o.ok?'They did it!':'Bottled it'}</h2><p>${o.why==='chicken'?'Chickened out.':o.why==='time'?'Ran out of time.':o.y+' said yes, '+o.n+' said no.'} <b>${o.pts>0?'+'+o.pts:o.pts}</b> for ${w}.</p>`+(o.bonus?`<p>🎉 ${w} earned a skip for 3 in a row.</p>`:'')+(HUI()?`<button class=r data-a=nx>${S.t>=S.T?'Final scores':'Next dare'}</button><button data-a=fin>End the game now</button>`:'')}
 function vCh(){
  if(S.ph==='end'){const mx=Math.max(...S.p.map(p=>p.s));return `<h2>🏆 ${S.p.filter(p=>p.s===mx).map(p=>p.e+' '+esc(p.n)).join(' & ')}</h2><p>Won with ${mx} point${mx===1?'':'s'}.</p>`}
  const mine=S.who===id,w=pName(S.who),
  tg=`<span class=tag>Charades ${S.t} of ${S.T}: ${LV[S.lv-1]}</span>`,
  gl=S.gl&&S.gl.length?`<div class=card style="margin:10px 0;padding:12px">${S.gl.map(x=>`<div>${pName(x.by)}: ${esc(x.t)}</div>`).join('')}</div>`:'',
- hb=host&&S.ph==='go'?'<button class=t data-a=ev>Time’s up, count it as a fail</button>':'',
+ hb=HUI()&&S.ph==='go'?'<button class=t data-a=ev>Time’s up, count it as a fail</button>':'',
  cb=mine?(LS?'':CERR?`<p>${esc(CERR)}</p><button data-a=camretry>📷 Try camera again</button>`:'<p><small>📷 Starting your camera…</small></p>'):'';
  if(S.ph==='go'){
   if(mine)return tg+`<div class=card style="background:var(--pink);text-align:center"><span class=tag>Act it out. No talking!</span><h2>${W&&W.w?esc(W.w):'…'}</h2></div><p>Your camera is live. No words, no pointing at things with writing on. Get +${S.lv} when someone guesses it.</p>`+gl+cb+'<button data-a=gu>🐔 Give up (-1)</button>'+hb;
   return tg+`<div class=card style="background:var(--mint);text-align:center"><h3>${w} is acting something out</h3><small>Watch the camera, then type your guess.</small></div>`+gl+`<input id=gs maxlength=40 placeholder="Your guess" autocomplete=off><button class=r data-a=gs>Guess</button>`+hb}
- const o=S.out;return tg+`<div class=card style="background:var(--pink);text-align:center"><h2>${esc(o.w)}</h2></div><h2>${o.ok?'Got it!':o.why==='gaveup'?'Gave up':'Nobody got it'}</h2><p>${o.ok?pName(o.by)+' guessed it. +'+S.lv+' each for them and '+w+'.':w+' gets <b>-1</b>.'}</p>`+(host?`<button class=r data-a=nx>${S.t>=S.T?'Final scores':'Next round'}</button><button data-a=fin>End the game now</button>`:'')}
+ const o=S.out;return tg+`<div class=card style="background:var(--pink);text-align:center"><h2>${esc(o.w)}</h2></div><h2>${o.ok?'Got it!':o.why==='gaveup'?'Gave up':'Nobody got it'}</h2><p>${o.ok?pName(o.by)+' guessed it. +'+S.lv+' each for them and '+w+'.':w+' gets <b>-1</b>.'}</p>`+(HUI()?`<button class=r data-a=nx>${S.t>=S.T?'Final scores':'Next round'}</button><button data-a=fin>End the game now</button>`:'')}
 function vPp(){
  if(S.ph==='end'){const mx=Math.max(...S.p.map(p=>p.s));return `<h2>🏆 ${S.p.filter(p=>p.s===mx).map(p=>p.e+' '+esc(p.n)).join(' & ')}</h2><p>Won with ${mx} point${mx===1?'':'s'}.</p>`}
  if(S.ph==='mk'){
@@ -366,18 +403,18 @@ function vPp(){
   else h+='<p>Waiting for the host to start…</p>';
   return h}
  const tg=`<span class=tag>Round ${S.t} of ${S.T}</span>`;
- if(S.ph==='play')return tg+`<div class=card id=pc style="text-align:center">${ppCard()}</div>`+(host?'<button data-a=ev>Stop waiting for everyone</button>':'');
+ if(S.ph==='play')return tg+`<div class=card id=pc style="text-align:center">${ppCard()}</div>`+(HUI()?'<button data-a=ev>Stop waiting for everyone</button>':'');
  const mine=S.who===id,w=pName(S.who),
  rs=S.rs?`<div class=card style="padding:12px">${S.rs.map((x,i)=>`<div>${i?'':'🥇 '}${pName(x.id)}: <b>${ppFmt(x.v)}</b>${x.id===S.who?' 💀':''}</div>`).join('')}</div>`:'',
  pc=`<div class=card style="background:var(--pink);text-align:center"><span class=tag>${mine?'You lost. Your punishment:':w+' lost. Their punishment:'}</span><h2>${esc(S.pt)}</h2></div>`;
  if(S.ph==='pun'){
   const nv=N()-1,got=Object.keys(S.v).length,vv=S.v[id],
-  hb=host?'<button class=t data-a=ev>Count the votes now</button>':'';
+  hb=HUI()?'<button class=t data-a=ev>Count the votes now</button>':'';
   if(mine){const cb=LS?'':CERR?`<p>${esc(CERR)}</p><button data-a=camretry>📷 Try camera again</button>`:'<p><small>📷 Starting your camera…</small></p>';
    return tg+rs+pc+`<p>Do it on camera. The others decide if you pulled it off (${got}/${nv} voted). Do it for +1, or chicken out and lose 1.</p>`+cb+'<button data-a=xg>🐔 Chicken out (-1)</button>'+hb}
   return tg+rs+pc+`<p>Watch ${w}. Did they do it?</p><button class="${vv===1?'r':''}" data-a=xv data-y="1">✔ They did it</button><button class="${vv===0?'r':''}" data-a=xv data-y="0">✖ They didn’t</button><p><small>${got}/${nv} voted</small></p>`+hb+'<p><small>Keep it safe: nothing painful, and no touching people.</small></p>'}
  const o=S.out;
- return tg+rs+pc+`<h2>${o.gu?'Chickened out':o.ok?'Punishment done!':'Bottled it'}</h2><p>${o.gu?w+' passed. <b>-1</b>':`${o.y} said yes, ${o.n} said no. <b>${o.ok?'+1':'-1'}</b> for ${w}.`}</p><p><small>Everyone who didn’t lose got +1.</small></p>`+(host?`<button class=r data-a=nx>${S.t>=S.T?'Final scores':'Next round'}</button><button data-a=fin>End the game now</button>`:'')}
+ return tg+rs+pc+`<h2>${o.gu?'Chickened out':o.ok?'Punishment done!':'Bottled it'}</h2><p>${o.gu?w+' passed. <b>-1</b>':`${o.y} said yes, ${o.n} said no. <b>${o.ok?'+1':'-1'}</b> for ${w}.`}</p><p><small>Everyone who didn’t lose got +1.</small></p>`+(HUI()?`<button class=r data-a=nx>${S.t>=S.T?'Final scores':'Next round'}</button><button data-a=fin>End the game now</button>`:'')}
 const sfTxt=x=>x.k==='d'?'✏️ sent a doodle':esc(x.v);
 function vSf(){
  if(S.ph==='end'){const mx=Math.max(...S.p.map(p=>p.s));return `<h2>🗿 ${S.p.filter(p=>p.s===mx).map(p=>p.e+' '+esc(p.n)).join(' & ')}</h2><p>Stoniest face in the room, with ${mx} point${mx===1?'':'s'}.</p>`}
@@ -387,12 +424,12 @@ function vSf(){
   const h=o.ok?`<h2>🗿 Stone cold!</h2><p>${w} kept a straight face for ${S.dur} seconds. <b>+${o.pts}</b></p>`
    :o.why==='cracked'?`<h2>😂 Cracked!</h2><p>${w} broke. Spotted by ${o.sp.map(pName).join(', ')} (<b>+1</b> each).</p>`+(o.as?`<p>Assist for the hit that did it: ${pName(o.as)} <b>+1</b></p>`:'')
    :`<h2>🏳️ ${w} gave up</h2><p><b>-1</b> for ${w}.</p>`;
-  return tg+`<div class=card style="text-align:center">${h}</div>`+(host?`<button class=r data-a=nx>${S.t>=S.T?'Final scores':'Next face'}</button><button data-a=fin>End the game now</button>`:'')}
+  return tg+`<div class=card style="text-align:center">${h}</div>`+(HUI()?`<button class=r data-a=nx>${S.t>=S.T?'Final scores':'Next face'}</button><button data-a=fin>End the game now</button>`:'')}
  if(S.on&&SFV.t!==S.t)SFV={t:S.t,at:Date.now()};
  const el=S.on?(Date.now()-SFV.at)/1000:0,
  bar=S.on?`<div class="bar sfbar" style="animation:sfb ${S.dur}s linear forwards;animation-delay:-${el.toFixed(2)}s"></div>`:'',
  last=(S.fx||[]).slice(-1)[0],key=last?S.t+'-'+last.n:'',pop=last&&key!==SFN?' pop':'';if(last)SFN=key;
- const go=host&&!S.on?'<button class=t data-a=sfgo>Start the clock now</button><button data-a=sfskip>Skip this player</button>':'';
+ const go=HUI()&&!S.on?'<button class=t data-a=sfgo>Start the clock now</button><button data-a=sfskip>Skip this player</button>':'';
  if(mine){
   const cb=LS?'':CERR?`<p>${esc(CERR)}</p><button data-a=camretry>📷 Try camera again</button>`:'<p><small>📷 Starting your camera…</small></p>';
   if(!S.on)return tg+`<div class=card style="background:var(--pink);text-align:center"><h2>You’re up 🗿</h2><p>Your camera goes live, then the class fires silly stuff at your screen. Keep a straight face for ${S.dur} seconds.</p></div>`+cb+go;
@@ -407,23 +444,47 @@ function vSf(){
 function vQb(){
  const tg=`<span class=tag>Round ${S.r} of 4</span>`;
  if(S.ph==='ans'){
-  if(qd===S.r||S.dn.includes(id))return tg+`<h2>Waiting on the others</h2><div class=card><h3>${esc(S.q)}</h3>${S.dn.length}/${N()} answered</div>`+(host?'<button data-a=skip>Skip whoever’s stuck</button>':'');
+  if(qd===S.r||S.dn.includes(id))return tg+`<h2>Waiting on the others</h2><div class=card><h3>${esc(S.q)}</h3>${S.dn.length}/${N()} answered</div>`+(HUI()?'<button data-a=skip>Skip whoever’s stuck</button>':'');
   qs=S.r;return tg+`<h2>Make it funny</h2><div class=card><h3>${esc(S.q)}</h3></div><input id=qa maxlength=60 placeholder="Your answer"><button class=r data-a=qa>Done</button>`}
  if(S.ph==='vote')return tg+`<h2>Vote for the funniest</h2><div class=card><b>${esc(S.q)}</b></div>`+(id in S.v?`<p>Vote sent. ${Object.keys(S.v).length}/${N()} voted.</p>`:S.o.map((t,i)=>t===myA?'':`<button data-a=qv data-o="${i}">${esc(t)}</button>`).join(''));
- return `<h2>${esc(S.q)}</h2>`+[...S.res].sort((a,b)=>b.vs.length-a.vs.length).map(x=>`<div class=card style="margin:10px 0;padding:12px"><h3>${esc(x.t)}</h3><span class=tag>${pName(x.by)}</span> +${x.vs.length} ${x.vs.map(v=>(S.p.find(p=>p.id===v)||{e:''}).e).join('')}</div>`).join('')+(host?`<button class=r data-a=nx>${S.r>=4?'Finish':'Next'}</button>`:'')}
+ return `<h2>${esc(S.q)}</h2>`+[...S.res].sort((a,b)=>b.vs.length-a.vs.length).map(x=>`<div class=card style="margin:10px 0;padding:12px"><h3>${esc(x.t)}</h3><span class=tag>${pName(x.by)}</span> +${x.vs.length} ${x.vs.map(v=>(S.p.find(p=>p.id===v)||{e:''}).e).join('')}</div>`).join('')+(HUI()?`<button class=r data-a=nx>${S.r>=4?'Finish':'Next'}</button>`:'')}
 const vres=()=>{const c=tal();return S.p.map(p=>`<div class=card style="padding:10px;margin:10px 0"><b>${pName(p.id)}</b>: ${c[p.id]||0}<div class=bar style="width:${(c[p.id]||0)/N()*100}%"></div><small>${Object.keys(S.v).filter(v=>S.v[v]===p.id).map(pName).join(', ')||'nobody'}</small></div>`).join('')};
 function vIm(){
  const sec=W?(W.w?`<div class=card style="text-align:center"><small>Your secret word</small><div class=big style="font-size:40px;letter-spacing:0">${esc(W.w)}</div></div>`:`<div class=card style="background:var(--pink);text-align:center"><h2>You’re the imposter 🕵️</h2><p>You don’t get a word. Bluff your way through.</p></div>`):'',
  cls=()=>`<div class=card>${S.p.map(p=>`<div>${pName(p.id)}: <b>${((S.cl||{})[p.id]||[]).map(esc).join(', ')||'…'}</b></div>`).join('')}</div>`;
  if(S.ph==='clue'){
   const hd=`<h2>Clue round ${S.cr} of 2</h2>`;
-  if(cd===S.k||S.dn.includes(id))return sec+hd+`<p>Waiting on the others (${S.dn.length}/${N()}).</p>`+(S.cr>1?cls():'')+(host?'<button data-a=skip>Skip whoever’s stuck</button>':'');
+  if(cd===S.k||S.dn.includes(id))return sec+hd+`<p>Waiting on the others (${S.dn.length}/${N()}).</p>`+(S.cr>1?cls():'')+(HUI()?'<button data-a=skip>Skip whoever’s stuck</button>':'');
   cs=S.k;return sec+hd+`<p>Type one word that hints at the secret word. Not too obvious, or the imposter will work it out. Imposter, bluff.</p>`+(S.cr>1?cls():'')+`<input id=cl maxlength=20 placeholder="One word"><button class=r data-a=cl>Send clue</button>`}
- if(S.ph==='show')return sec+`<h2>The clues</h2>`+cls()+(host?(S.cr<2?'<button data-a=more>Another clue round</button>':'')+'<button class=r data-a=tv>Vote now</button>':'<p>The host decides when to vote.</p>');
+ if(S.ph==='show')return sec+`<h2>The clues</h2>`+cls()+(HUI()?(S.cr<2?'<button data-a=more>Another clue round</button>':'')+'<button class=r data-a=tv>Vote now</button>':'<p>The host decides when to vote.</p>');
  if(S.ph==='vote')return sec+`<h2>Who’s the imposter?</h2>`+cls()+(S.v[id]?`<p>Vote sent. ${Object.keys(S.v).length}/${N()} voted.</p>`:S.p.filter(p=>p.id!==id).map(p=>`<button data-a=vote data-i="${p.id}">${p.e} ${esc(p.n)}</button>`).join(''));
- return `<h2>${S.caught?'Got them! 🎉':'The imposter got away with it 😈'}</h2><div class=card>Imposter: <b>${pName(S.bad)}</b><br>Word: <b>${esc(S.w)}</b></div>`+cls()+vres()+(host?'<button class=r data-a=nx>Another round</button>':'')}
-const board=()=>S.g==='dp'?'':`<div class=card><h3>Scores</h3>${[...S.p].sort((a,b)=>b.s-a.s).map(p=>chip(p)+'<b>'+p.s+'</b>'+(S.g==='sd'?' <small>⏭'+p.sk+'</small>':'')+(host&&p.z?`<button data-a=kick data-i="${p.id}" style="width:auto;display:inline-block;padding:2px 8px;font-size:13px;box-shadow:none">kick</button>`:'')).join(' ')}</div>`;
-const vGame=()=>({dp:vDp,ml:vMl,im:vIm,qb:vQb,sd:vSd,ch:vCh,pp:vPp,sf:vSf}[S.g])()+board()+(host?'<button data-a=home>Back to lobby</button>':'');
+ return `<h2>${S.caught?'Got them! 🎉':'The imposter got away with it 😈'}</h2><div class=card>Imposter: <b>${pName(S.bad)}</b><br>Word: <b>${esc(S.w)}</b></div>`+cls()+vres()+(HUI()?'<button class=r data-a=nx>Another round</button>':'')}
+const board=()=>S.g==='dp'?'':`<div class=card><h3>Scores</h3>${[...S.p].sort((a,b)=>b.s-a.s).map(p=>chip(p)+'<b>'+p.s+'</b>'+(S.g==='sd'?' <small>⏭'+p.sk+'</small>':'')+(HUI()&&p.z?`<button data-a=kick data-i="${p.id}" style="width:auto;display:inline-block;padding:2px 8px;font-size:13px;box-shadow:none">kick</button>`:'')).join(' ')}</div>`;
+
+const HOW={
+dp:['Everyone writes a weird sentence.','You get someone else’s sentence. Draw it.','The next person guesses what your drawing shows, then it gets drawn again, and so on.','At the end you flick through each chain to see how it changed.'],
+ml:['A question appears, like “who’s most likely to…”.','Vote for the player it fits best.','Whoever gets the most votes scores 1 point.'],
+im:['Everyone sees the same secret word, except one player: the imposter.','Give a one-word clue. Don’t say the word itself.','Then vote for who you think the imposter is.','Catch them and everyone else scores 1. If they get away, they score 2.'],
+qb:['A prompt appears. Write your funniest answer.','Then everyone votes for their favourite. You can’t vote for your own.','Each vote you get is 1 point.'],
+sd:['One player at a time gets a dare, shown to everyone.','They do it on live camera, then tap Completed.','Everyone else votes on whether they really did it.','Did it: points equal to the dare level. Chickened out or failed: lose 1.'],
+ch:['One player gets a secret word and acts it out on live camera. No talking!','Everyone else types guesses.','The first correct guess scores for the guesser and the actor. If nobody gets it, the actor loses 1.'],
+sf:['One player goes live and has to keep a straight face.','Everyone else sends them silly typed lines or doodles, and taps “They cracked!” when they see a smile.','Survive the timer for +3. If most watchers spot a crack, the spotters score. Giving up costs 1.'],
+pp:['Everyone writes a few punishments.','Each round is a quick contest, and the loser gets a random punishment.','They do it on live camera and everyone votes on whether they did. Done: +1. Not done: −1.']};
+const TIMES={dp:'Writing 30 s, drawing 60 s',ml:'20 s to vote',im:'25 s for clues, 25 s to vote',qb:'30 s to answer, 20 s to vote',sd:'60 s per dare',ch:'60 s per word',sf:'15 to 25 s of straight face',pp:'45 s to write, 15 s contest, 45 s punishment'};
+const fmtT=ms=>{const s=Math.max(0,Math.ceil(ms/1000));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const tmrHtml=()=>{if(!S.dl||!S.dt)return'';const r=Math.max(0,S.dl-(Date.now()+TOFF));return `<div class="tmr${r<=5000?' low':''}"><div class=tmrt><span>⏱ ${esc(S.tl||'')}</span><b id=tmv>${fmtT(r)}</b></div><div class=tmrb><i id=tmi style="width:${Math.min(100,r/S.dt*100).toFixed(1)}%"></i></div></div>`};
+const isFirst=()=>{const g=S.g;return g==='dp'?S.r===0:(g==='ml'||g==='qb')?S.r<=1:g==='im'?(S.k||1)<=1:S.t<=1};
+const howOn=()=>HW===1||(HW!==2&&isFirst());
+const howCard=()=>{const g=GM.find(x=>x[0]===S.g);return howOn()?`<div class=card style="background:var(--sun)"><b>📖 How to play ${g[1]} ${g[2]}</b><ol>${HOW[S.g].map(x=>`<li>${x}</li>`).join('')}</ol><small>⏱ ${TIMES[S.g]}. The bar at the top counts down, and the game moves on by itself when it runs out.</small></div>`:''};
+const howBtn=()=>`<button data-a=how style="width:auto;display:inline-block;padding:4px 12px;font-size:14px;box-shadow:none">${howOn()?'✖ Hide the rules':'❓ How to play'}</button>`;
+function vSpec(){const g=GM.find(x=>x[0]===S.g);return `<h2>👀 You’re watching</h2><div class=card style="background:var(--mint)"><b>${g[1]} ${g[2]}</b> is already running.<br><small>This game can’t be joined halfway through, so you’re a spectator. You’ll be added to the next game automatically.</small></div>`+tmrHtml()+`<div class=card><b>Right now:</b> ${esc(S.tl||'Players are playing')}</div>`+board()}
+const HOMEHOW=`<div class=card><h3>How it works</h3>
+<p><b>🌍 Open room:</b> no host and no code. Tap the button, vote for a game, and it starts by itself once everyone has voted (or 25 seconds after the first vote, with at least 3 players). Every game runs on timers.</p>
+<p><b>Joining halfway:</b> you can jump into most games while they’re running. Doodle Chain and Imposter can’t be joined midway, so you’ll watch as a spectator and join the next game automatically.</p>
+<p><b>🔑 Private room:</b> make your own room and share the 4-letter code or QR code. You’re the host and you pick the games.</p>
+<p><b>📷 Cameras:</b> some games switch your camera on for your turn. Your browser asks permission first.</p>
+<p><b>🚩 Safety:</b> in the open room, if most players flag someone, they’re removed.</p></div>`;
+const vGame=()=>{if(HWG!==S.g){HWG=S.g;HW=0}if(isSpec())return vSpec();return howBtn()+tmrHtml()+howCard()+({dp:vDp,ml:vMl,im:vIm,qb:vQb,sd:vSd,ch:vCh,pp:vPp,sf:vSf}[S.g])()+board()+(HUI()?'<button data-a=home>Back to lobby</button>':'')};
 
 async function autoCam(){const t=S.t;try{const s=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:320},height:{ideal:240},frameRate:{ideal:15}},audio:true});if(!(camOn()&&S.who===id&&S.t===t)){s.getTracks().forEach(x=>x.stop());return}LS=s;CERR='';act({t:'live',on:1})}catch(e){CERR='The camera didn’t start. Allow camera and mic access in your browser, then try again.'}render()}
 function onCall(c){const d=S.p.find(p=>p.id===S.who);if(!((S.g==='sd'||S.g==='ch'||S.g==='pp'||S.g==='sf')&&S.cam&&S.who!==id&&d&&d.pi===c.peer))return;c.answer();c.on('stream',s=>{VS=s;camUI()})}
@@ -448,7 +509,7 @@ function render(){
  if(S.g==='sf'&&S.ph==='go'&&SFDW===S.t&&$('#cv'))return;
  shown=-1;qs=-1;cs=-1;
  const kp=['gs','pi','sft'].map(i=>{const e=$('#'+i);return e?{i,v:e.value,f:document.activeElement===e,k:i==='pi'||i==='sft'||GK===S.t}:null}).filter(Boolean);
- $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+(S.g?'':BKN)+'<p><small>build 26</small></p>';
+ $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+(S.g?'':BKN)+(me&&!S.p.length?HOMEHOW:'')+'<p><small>build 28</small></p>';
  if($('#qr')&&window.QRCode)new QRCode($('#qr'),{text:location.href.split(/[?#]/)[0]+'?room='+S.c,width:230,height:230,correctLevel:QRCode.CorrectLevel.L});
  if($('#cv'))initCv();
  GK=$('#gs')?S.t:-1;kp.forEach(o=>{const e=$('#'+o.i);if(e&&o.k){if(o.v)e.value=o.v;if(o.f){e.focus();try{e.setSelectionRange(e.value.length,e.value.length)}catch(x){}}}});ppBind();
@@ -506,7 +567,7 @@ const A={
  signin(){const n=$('#nm').value.trim();if(!n)return;me={n,e:tmp.e};try{localStorage.hop=JSON.stringify(me)}catch(e){}render();if(Q0&&ready()){join(Q0);render()}},
  out(){me=null;try{localStorage.removeItem('hop')}catch(e){}render()},
  host(){if(!ready())return;err='';startHost();render()},
- scan(){scanOpen()},gv(d){act({t:'gv',g:d.g})},gvgo(){act({t:'gvgo'})},
+ scan(){scanOpen()},how(){HW=howOn()?2:1;render()},rp(d){act({t:'rp',i:d.i})},gv(d){act({t:'gv',g:d.g})},gvgo(){act({t:'gvgo'})},
  open(){if(!ready())return;err='';OPENING=1;OT=0;join('OPEN');render()},ban(d){act({t:'kick',i:d.i,b:1})},
  xa(){const el=$('#pi');if(!el)return;const v=el.value.trim();if(!v)return;el.value='';act({t:'xa',v})},xr(d){act({t:'xr',i:+d.i})},xgo(){act({t:'xgo'})},xg(){act({t:'xg'})},xv(d){act({t:'xv',y:+d.y})},
  join(){const c=$('#cd').value.trim();if(c.length===4&&ready()){err='';join(c);render()}},
@@ -528,6 +589,7 @@ const A={
 };
 document.addEventListener('keydown',e=>{if(e.key==='Enter'){if(e.target.id==='gs')A.gs();else if(e.target.id==='pi')A.xa();else if(e.target.id==='sft')A.sfs()}});
 let BK=0,BT=document.title,BKT=0;
+setInterval(()=>{try{if(!S.dl||!S.dt)return;const r=Math.max(0,S.dl-(Date.now()+TOFF)),v=$('#tmv'),i=$('#tmi');if(v)v.textContent=fmtT(r);if(i)i.style.width=Math.min(100,r/S.dt*100).toFixed(1)+'%';const t=v&&v.closest&&v.closest('.tmr');if(t)t.classList.toggle('low',r<=5000)}catch(e){}},250);
 function bk(on){BK=on;const o=$('#bk');o.hidden=!on;document.title=on?'Fractions Revision':BT;if(on)o.scrollTop=0}
 $('#bkb').onclick=()=>bk(1);$('#bkx').onclick=()=>bk(0);
 document.addEventListener('keydown',e=>{if(e.key==='Escape')bk(!BK)});
@@ -546,10 +608,10 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
 (function(){
  if(/[?&]safe=1/.test(location.search))return;
  const KEY='hopx',RXE=['👏','😂','🔥','💀','❤️'],
- FEATS=[['chat','💬 Chat','Message everyone in the room.'],['rx','🎉 Reactions','Tap an emoji and it floats up on everyone’s screen.']],
+ FEATS=[['chat','💬 Chat','Message everyone in the room.'],['rx','🎉 Reactions','Tap an emoji and it floats up on everyone’s screen.'],['a2hs','📲 Add to home screen','Put Hop In on your phone like an app: full screen, no browser bars.'],['disguise','🏫 School disguise','Renames the site and the games to look like a study app, with calm colours. Only changes your own screen.']],
  BAD=/\b(f+u+c+k+\w*|sh[i1]+t+\w*|b[i1]tch\w*|cunt\w*|d[i1]ck\w*|a+ss+h[o0]le\w*|bastard\w*|p[i1]ss\w*|sl[u]+t+\w*|wh[o0]re\w*)\b/gi;
- let cfg={chat:0,rx:0};try{Object.assign(cfg,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
- const ERR=[],FAIL={chat:0,rx:0},LOG=[],RT={},CT={};let CH=[],CHO=0,UN=0,TS=null;
+ let cfg={chat:0,rx:0,a2hs:0,disguise:0,dg:0};try{Object.assign(cfg,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+ const ERR=[],FAIL={chat:0,rx:0,a2hs:0,disguise:0},LOG=[],RT={},CT={};let CH=[],CHO=0,UN=0,TS=null;
  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(cfg))}catch(e){}};
  const E=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const note=(k,e)=>{ERR.push((k||'zone')+': '+(e&&e.message||e));if(ERR.length>20)ERR.shift();if(k&&k in cfg&&++FAIL[k]>=3){cfg[k]=0;save()}};
@@ -584,6 +646,59 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
  <div id=xz hidden></div>`;
  document.body.appendChild(root);
 
+ // ---- School disguise: changes names, tab title, icon and colours on YOUR screen only ----
+ const DIS=[{n:'Study Hub',e:'📚',t:'revision tools',bg:'#f3efe4',ac:'#d9e6f5',sec:'#e3eddc',dk:'#2d5a8a'},
+  {n:'Class Portal',e:'🏫',t:'student portal',bg:'#eaf1f7',ac:'#cfe0ee',sec:'#e1ede6',dk:'#1f4e79'},
+  {n:'Homework Helper',e:'✏️',t:'homework tools',bg:'#fbf6e6',ac:'#f3e3b3',sec:'#e4ecd6',dk:'#6b4f1d'}];
+ const GAMEN=[['Doodle Chain','Sketch Notes'],['Most Likely To','Class Survey'],['Imposter','Odd One Out'],['Quick Brain','Quick Quiz'],['Dare Duty','Challenge Cards'],['Live Charades','Vocab Charades'],['Punishment Roulette','Penalty Review'],['Stone Face','Focus Drill']];
+ let CURD=null,DOBS=null,TOBS=null,DICON=null,DICO0=null,DSTY=null;
+ const pairsFor=d=>[['Join the open room','Join a study group'],['open room','study group'],['Open room','Study group'],['Private room','Private class'],['Big call','Study call'],['Party games','Study games'],['your mates','your classmates'],...GAMEN,['Hop In',d.n],['🎈',d.e],['Scores','Marks']].sort((a,b)=>b[0].length-a[0].length);
+ const dgText=str=>{const d=CURD||DIS[(cfg.dg|0)%DIS.length];let v=String(str);for(const[a,b]of pairsFor(d))v=v.split(a).join(b);return v};
+ function dgSwap(root,rev){if(!root)return;const d=CURD||DIS[(cfg.dg|0)%DIS.length];let pr=pairsFor(d);if(rev)pr=pr.map(([a,b])=>[b,a]).sort((a,b)=>b[0].length-a[0].length);
+  const w=document.createTreeWalker(root,4);let n;while((n=w.nextNode())){const o=n.nodeValue;let v=o;for(const[a,b]of pr)v=v.split(a).join(b);if(v!==o)n.nodeValue=v}}
+ const dgAll=rev=>{dgSwap($x('#app'),rev);dgSwap($x('#ca'),rev)};
+ function dgIcon(e){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.font='52px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(e,32,36);return c.toDataURL('image/png')}
+ function dgTitle(){const d=CURD;if(!d)return;const want=d.n+' - '+d.t;if(document.title!=='Fractions Revision'&&document.title!==want)document.title=want}
+ function dgOn(){
+  const d=CURD=DIS[(cfg.dg|0)%DIS.length];
+  if(!DSTY){DSTY=document.createElement('style');DSTY.id='xdg';document.head.appendChild(DSTY)}
+  DSTY.textContent=`:root{--sun:${d.bg};--pink:${d.ac};--mint:${d.sec};--blue:${d.dk};--ink:#25303b}
+  body{font-family:Georgia,'Times New Roman',serif}h1,h2,h3{font-family:Georgia,'Times New Roman',serif;font-weight:700}h1{font-size:38px;transform:none}h2{font-size:26px}h3{font-size:20px}
+  .card{border-width:2px;border-radius:6px;box-shadow:2px 2px 0 rgba(0,0,0,.2)}button{border-width:2px;border-radius:6px;box-shadow:none;font-weight:600}button.t{color:#fff}`;
+  try{if(!DICON){DICON=document.querySelector('link[rel="icon"]');if(DICON&&DICO0===null)DICO0=DICON.getAttribute('href');if(!DICON){DICON=document.createElement('link');DICON.rel='icon';document.head.appendChild(DICON)}}DICON.setAttribute('href',dgIcon(d.e))}catch(e){note('disguise',e)}
+  dgAll(false);dgTitle();
+  try{if(!DOBS){DOBS=new MutationObserver(()=>{try{dgAll(false)}catch(e){note('disguise',e)}});DOBS.observe(document.body,{childList:true,subtree:true})}
+   const te=document.querySelector('title');if(te&&!TOBS){TOBS=new MutationObserver(()=>{try{dgTitle()}catch(e){}});TOBS.observe(te,{childList:true})}}catch(e){note('disguise',e)}}
+ function dgOff(){
+  if(DOBS){DOBS.disconnect();DOBS=null}if(TOBS){TOBS.disconnect();TOBS=null}
+  try{dgAll(true)}catch(e){}
+  if(DSTY){try{DSTY.remove()}catch(e){}DSTY=null}
+  try{if(DICON&&DICO0!==null)DICON.setAttribute('href',DICO0)}catch(e){}
+  if(CURD){document.title='Hop In - party games'}
+  CURD=null;try{if(typeof render==='function')render()}catch(e){}}
+ if(cfg.disguise){try{dgOn()}catch(e){note('disguise',e)}}
+ // ---- Add to home screen: only does anything while its switch is ON ----
+ let DP=null,AMSG='',AEL=[],AURL='';
+ const standalone=()=>{try{return(window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone===true}catch(e){return false}};
+ const isiOS=()=>/iphone|ipad|ipod/i.test(navigator.userAgent||'')||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+ function mkIcon(n){const c=document.createElement('canvas');c.width=c.height=n;const g=c.getContext('2d');const gr=g.createLinearGradient(0,0,n,n);gr.addColorStop(0,'#ffd84d');gr.addColorStop(1,'#ff8fb3');g.fillStyle=gr;g.fillRect(0,0,n,n);g.font=Math.round(n*.58)+'px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText('🎈',n/2,n/2+n*.04);return c.toDataURL('image/png')}
+ function a2hsSetup(){
+  if(AEL.length)return;
+  const add=(tag,attrs)=>{const e=document.createElement(tag);Object.keys(attrs).forEach(k=>e.setAttribute(k,attrs[k]));document.head.appendChild(e);AEL.push(e)};
+  const i192=mkIcon(192),i512=mkIcon(512),start=location.origin&&location.origin!=='null'?location.origin+location.pathname:location.href.split(/[?#]/)[0];
+  try{const man={name:'Hop In',short_name:'Hop In',start_url:start,scope:start.replace(/[^/]*$/,''),display:'standalone',orientation:'portrait',background_color:'#fff8e7',theme_color:'#ffd84d',icons:[{src:i192,sizes:'192x192',type:'image/png',purpose:'any'},{src:i512,sizes:'512x512',type:'image/png',purpose:'any'}]};
+   AURL=URL.createObjectURL(new Blob([JSON.stringify(man)],{type:'application/manifest+json'}));add('link',{rel:'manifest',href:AURL})}catch(e){note('a2hs',e)}
+  add('link',{rel:'apple-touch-icon',href:i192});
+  add('meta',{name:'apple-mobile-web-app-capable',content:'yes'});add('meta',{name:'mobile-web-app-capable',content:'yes'});
+  add('meta',{name:'apple-mobile-web-app-title',content:'Hop In'});add('meta',{name:'theme-color',content:'#ffd84d'})}
+ function a2hsTeardown(){AEL.forEach(e=>{try{e.remove()}catch(x){}});AEL=[];DP=null;try{AURL&&URL.revokeObjectURL(AURL)}catch(e){}AURL=''}
+ function onBIP(e){e.preventDefault();DP=e;zone()}
+ function addHome(){
+  if(standalone()){AMSG='✅ You’re already using it from your home screen.';return zone()}
+  if(DP){const d=DP;d.prompt();d.userChoice.then(r=>{AMSG=r&&r.outcome==='accepted'?'✅ Added! Look for Hop In on your home screen.':'No problem. You can try again any time.';DP=null;zone()}).catch(()=>{});return}
+  AMSG=isiOS()?'On iPhone or iPad: tap the Share button (the square with an arrow) in Safari, scroll down, then tap “Add to Home Screen”.'
+   :'Open your browser menu (⋮ or ⋯) and tap “Install app” or “Add to Home screen”. If you don’t see it, switch this feature off and on, reload the page once, and try again.';zone()}
+ if(cfg.a2hs){try{a2hsSetup();window.addEventListener('beforeinstallprompt',onBIP);window.addEventListener('appinstalled',()=>{AMSG='✅ Added to your home screen.';DP=null;zone()})}catch(e){note('a2hs',e)}}
  function drawChat(){const l=$x('#xcl');if(!l)return;l.innerHTML=CH.map(x=>`<div class=xm><b>${E(x.e)} ${E(x.n)}</b> ${E(x.x)}</div>`).join('')||'<small>No messages yet. Say hi!</small>';l.scrollTop=l.scrollHeight}
  function floatRx(m){const c=$x('#xfl');if(!c||c.children.length>30)return;const p=(S.p||[]).find(p=>p.id===m.by),d=document.createElement('div');d.className='xfx';d.style.left=(6+Math.random()*76)+'%';d.innerHTML=E(m.e)+'<small>'+(p?E(p.n):'')+'</small>';c.appendChild(d);setTimeout(()=>d.remove(),2200)}
  function zone(){const z=$x('#xz');if(!z)return;
@@ -591,7 +706,7 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
   z.innerHTML=`<div class=xcard><div class=xh><b>🧪 Experimental zone</b><button data-x=zclose>Close</button></div>
   <p>Unfinished things live here. They start switched off, they only affect you, and one that keeps breaking turns itself off. The rest of the site isn’t touched. Add <b>?safe=1</b> to the web address to remove this zone completely.</p>
   ${FEATS.map(([k,n,d])=>`<div class=xf><div><b>${n}</b><br><small>${d}${FAIL[k]>=3?' <b>Switched itself off after errors.</b>':''}</small></div><button data-x=tg data-k=${k} class="${cfg[k]?'on':''}">${cfg[k]?'ON':'OFF'}</button></div>`).join('')}
-  <button data-x=test>Run connection test</button><p id=xtr>${tr}</p>
+  ${cfg.disguise?`<div class=xf style="display:block"><b>🏫 Look:</b> ${E(DIS[(cfg.dg|0)%DIS.length].n)}<br><small>Names, colours, tab title and icon are changed on your screen only.</small><br><button data-x=dgnext style="margin-top:6px">Change the look</button></div>`:''}${cfg.a2hs?`<div class=xf style="display:block"><b>📲 Add to home screen</b><p style="margin:6px 0"><small>${standalone()?'You’re already using the home-screen version.':DP?'Your browser can add it with one tap.':isiOS()?'On iPhone, this shows you the steps.':'Tap the button. If your browser can’t do it with one tap, it shows you the steps.'}</small></p><button data-x=a2hs>📲 Add to home screen</button>${AMSG?`<p style="margin:8px 0 0">${E(AMSG)}</p>`:''}</div>`:''}<button data-x=test>Run connection test</button><p id=xtr>${tr}</p>
   <details><summary>Error log (${ERR.length})</summary><pre>${E(ERR.join('\n')||'No errors.')}</pre></details>
   <p><button data-x=off>Turn everything off</button></p></div>`}
  function xHost(f,m){
@@ -606,15 +721,17 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
   if(m.t==='~hist'){CH=(m.l||[]).slice(-60);drawChat();return}
   if(m.t==='~chat'){if(!cfg.chat)return;CH.push(m);CH=CH.slice(-60);drawChat();if(!CHO&&m.by!==id){UN++;$x('#xcu').textContent=UN>9?'9+':UN}return}
   if(m.t==='~rx'){if(!cfg.rx)return;try{floatRx(m)}catch(e){note('rx',e)}}}
- window.XP={host:(f,m)=>{try{xHost(f,m)}catch(e){note('',e)}},recv:m=>{try{xRecv(m)}catch(e){note('',e)}}};
+ window.XP={host:(f,m)=>{try{xHost(f,m)}catch(e){note('',e)}},recv:m=>{try{xRecv(m)}catch(e){note('',e)}},dg:s=>dgText(s)};
 
  const chatSend=()=>{const i=$x('#xci');const v=i.value.trim();if(!v)return;i.value='';act({t:'~chat',x:v})};
  root.addEventListener('click',e=>{const b=e.target.closest('[data-x]');if(!b)return;const a=b.dataset.x;
   try{
    if(a==='zopen'){zone();$x('#xz').hidden=false}
    else if(a==='zclose')$x('#xz').hidden=true;
-   else if(a==='tg'){const k=b.dataset.k;cfg[k]=cfg[k]?0:1;FAIL[k]=0;save();zone();if(k==='chat'&&cfg.chat&&S.p&&S.p.length)act({t:'~hist'})}
-   else if(a==='off'){cfg.chat=cfg.rx=0;save();zone()}
+   else if(a==='tg'){const k=b.dataset.k;cfg[k]=cfg[k]?0:1;FAIL[k]=0;save();if(k==='a2hs'){AMSG='';if(cfg.a2hs){a2hsSetup();try{window.removeEventListener('beforeinstallprompt',onBIP);window.addEventListener('beforeinstallprompt',onBIP)}catch(e){}AMSG='On. If your browser doesn’t show a one-tap install, reload the page once.'}else a2hsTeardown()}if(k==='disguise'){if(cfg.disguise)dgOn();else dgOff()}zone();if(k==='chat'&&cfg.chat&&S.p&&S.p.length)act({t:'~hist'})}
+   else if(a==='off'){cfg.chat=cfg.rx=cfg.a2hs=cfg.disguise=0;a2hsTeardown();dgOff();save();zone()}
+   else if(a==='dgnext'){dgOff();cfg.dg=((cfg.dg|0)+1)%DIS.length;save();dgOn();zone()}
+   else if(a==='a2hs')addHome()
    else if(a==='test'){if(!(S.p&&S.p.length)){TS={k:0,no:1};zone();$x('#xtr').textContent='Join a room first, then run the test.';return}
     if(host){$x('#xtr').textContent='You’re the host, so there’s nothing to test.';return}
     TS={k:String(Date.now()),t0:performance.now()};zone();act({t:'~ping',k:TS.k});const t=TS;setTimeout(()=>{if(TS===t&&t.ok==null){t.no=1;zone()}},4000)}
@@ -776,5 +893,28 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
  }catch(e){}},1000);
  window.CALLDBG={join:joinCall,leave,poll,state:()=>({inCall,n:list.length,calls:Object.keys(calls),tiles:Object.keys(tiles),hub:!!hubPeer,CN,myId})};
 })();
+</script>
+
+<script>
+/* ===== Corner hints: small arrows pointing at the Experiments and Hide buttons (once per visit) ===== */
+(function(){try{
+ if(sessionStorage.getItem('hophint'))return;
+ const hide=document.querySelector('#bkb'),exp=document.querySelector('#xzb');if(!hide&&!exp)return;
+ const st=document.createElement('style');
+ st.textContent=`.hh{position:fixed;bottom:60px;z-index:92;background:#151515;color:#fff;border-radius:10px;padding:6px 10px;font:700 13px/1.2 system-ui,sans-serif;max-width:46vw;cursor:pointer;animation:hhb 1.6s ease-in-out infinite}
+ .hh::after{content:'';position:absolute;top:100%;width:0;height:0;border:7px solid transparent;border-top-color:#151515}
+ .hh.l{left:6px}.hh.l::after{left:16px}.hh.r{right:6px;text-align:right}.hh.r::after{right:16px}
+ @keyframes hhb{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+ @media (prefers-reduced-motion:reduce){.hh{animation:none}}`;
+ document.head.appendChild(st);
+ const els=[];const mk=(c,t)=>{const d=document.createElement('div');d.className='hh '+c;d.textContent=t;document.body.appendChild(d);els.push(d);return d};
+ if(exp)mk('l','🧪 Experiments');
+ if(hide)mk('r','🫣 Hide the game (or press Esc)');
+ const gone=()=>{els.forEach(e=>{try{e.remove()}catch(x){}});try{st.remove()}catch(x){}};
+ els.forEach(e=>e.addEventListener('click',gone));
+ [hide,exp].forEach(b=>b&&b.addEventListener('click',gone));
+ setTimeout(gone,12000);
+ sessionStorage.setItem('hophint','1');
+}catch(e){}})();
 </script>
 </body></html>
