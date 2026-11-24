@@ -36,7 +36,7 @@ small{opacity:.75}
 .tmrb i{display:block;height:100%;background:var(--sun);transition:width .25s linear}.tmr.low .tmrb i{background:var(--pink)}.tmr.low b{color:var(--pink)}
 .card ol{margin:6px 0 6px 20px;padding:0}.card li{margin:3px 0}
 #bkb{position:fixed;right:12px;bottom:12px;z-index:90;width:42px;height:42px;margin:0;padding:0;border-radius:50%;font-size:20px;text-align:center;opacity:.85;box-shadow:2px 2px 0 var(--ink)}
-#app{padding-bottom:64px}
+#app{padding-bottom:16px}
 #bkt{position:fixed;left:12px;right:68px;bottom:12px;z-index:91;background:var(--ink);color:#fff;border-radius:12px;padding:10px 14px;font-weight:700;font-size:15px}
 #bkt[hidden]{display:none}
 #bk{position:fixed;inset:0;z-index:100;background:#fff;color:#222;font:17px/1.6 Georgia,'Times New Roman',serif;overflow:auto;padding:max(22px,env(safe-area-inset-top)) 22px 40px}
@@ -47,7 +47,43 @@ small{opacity:.75}
 .sfbar{transform-origin:left;background:var(--pink)}
 @media (prefers-reduced-motion:reduce){.pop{animation:none}}
 #camw{max-width:480px;margin:0 auto;padding:max(18px,env(safe-area-inset-top)) 16px 0}#camw video{width:100%;max-height:38vh;object-fit:cover;background:#000;border:3px solid var(--ink);border-radius:14px;box-shadow:6px 6px 0 var(--ink);display:block}#camt{font-weight:800;margin:8px 0 0}
-</style></head><body><div id=camw hidden><video id=rv autoplay playsinline></video><div id=camt></div></div><div id=app></div><button id=bkb aria-label="Hide the game" title="Hide the game (Esc)">🫣</button>
+
+/* ---- home page ---- */
+body.hm{background-image:radial-gradient(rgba(21,21,21,.13) 1.6px,transparent 1.7px);background-size:20px 20px}
+body.hm #app{padding-top:max(46px,calc(env(safe-area-inset-top) + 30px))}
+.hm-hero{text-align:center;margin:6px 0 14px}
+.hm-logo{font-size:68px;margin:0;line-height:1;transform:rotate(-3deg);color:#fff;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;text-shadow:5px 5px 0 var(--ink)}
+.hm-bal{display:inline-block;-webkit-text-stroke:0;text-shadow:none;animation:hmbob 2.6s ease-in-out infinite}
+@keyframes hmbob{0%,100%{transform:translateY(0) rotate(6deg)}50%{transform:translateY(-8px) rotate(-4deg)}}
+.hm-tag2{margin:12px 0 8px;font-weight:700}
+.hm-chips{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.hm-chips span{background:var(--ink);color:#fff;border-radius:999px;padding:3px 12px;font-size:13px;font-weight:800}
+.hm-me{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:12px 0 0}
+.hm-link{width:auto;display:inline-block;margin:0;padding:3px 10px;font-size:14px;box-shadow:none;background:transparent;border-width:2px}
+.hm-open{background:var(--pink)}
+.hm-open h2{margin:6px 0 4px;font-size:36px;color:#fff;-webkit-text-stroke:2px var(--ink);paint-order:stroke fill;text-shadow:3px 3px 0 var(--ink)}
+.hm-open p{margin:4px 0 10px;font-weight:700}
+.hm-tg{display:inline-block;background:var(--ink);color:#fff;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:800;transform:rotate(-2deg)}
+.hm-open button{background:#fff;font-size:19px;text-align:center}
+.hm-live{display:inline-flex;align-items:center;gap:7px;background:#fff;border:2px solid var(--ink);border-radius:999px;padding:3px 12px;font-weight:800;font-size:14px;margin-bottom:6px}
+.hm-live i{width:10px;height:10px;border-radius:50%;background:#18c964;animation:hmping 1.8s infinite}.hm-live.off i{display:none}
+@keyframes hmping{0%{box-shadow:0 0 0 0 rgba(24,201,100,.6)}70%,100%{box-shadow:0 0 0 9px rgba(24,201,100,0)}}
+.hm-priv h3{margin:0 0 6px}
+.hm-or{display:flex;align-items:center;gap:10px;margin:14px 0 2px;font-size:13px;font-weight:800;opacity:.7}.hm-or::before,.hm-or::after{content:'';flex:1;border-top:2px dashed var(--ink)}
+.hm-code{display:flex;gap:8px}.hm-code input{flex:1;min-width:0;margin:10px 0;text-align:center;letter-spacing:8px;text-transform:uppercase;font-weight:800;font-size:20px}.hm-code button{width:auto;margin:10px 0;padding:12px 22px;text-align:center}
+.hm-wait{display:flex;align-items:center;gap:12px;flex-wrap:wrap}.hm-wait small{flex-basis:100%}
+.hm-spin{width:22px;height:22px;border:4px solid var(--ink);border-top-color:transparent;border-radius:50%;animation:hmspin .8s linear infinite}
+@keyframes hmspin{to{transform:rotate(360deg)}}
+.hm-err{background:#fff0f4;border-color:var(--pink)}
+.hm-who h3{margin:0 0 8px}.hm-lab{display:block;margin:10px 0 4px;font-weight:800;opacity:.7}
+.hm-em{display:grid;grid-template-columns:repeat(auto-fill,minmax(48px,1fr));gap:8px;margin:6px 0 14px}.hm-em .e{width:100%;flex:none;padding:6px 0}
+.hm-note{margin:14px 0;background:var(--mint);border:2px solid var(--ink);border-radius:12px;padding:8px 12px;font-size:14px}
+.hm-how{padding:0}.hm-how summary{cursor:pointer;font-weight:800;padding:14px 16px;list-style:none}.hm-how summary::-webkit-details-marker{display:none}.hm-how[open] summary{border-bottom:2px dashed var(--ink)}
+.hm-how .hm-hl{display:flex;gap:10px;padding:8px 16px}.hm-how .hm-hl span{font-size:24px;line-height:1.3}.hm-how .hm-hl p{margin:0}.hm-how .hm-hl:last-child{padding-bottom:14px}
+.hm-foot{text-align:center;margin:10px 0}
+#after{max-width:480px;margin:0 auto;padding:0 16px 80px}
+@media (prefers-reduced-motion:reduce){.hm-bal,.hm-live i,.hm-spin{animation:none}}
+</style></head><body><div id=camw hidden><video id=rv autoplay playsinline></video><div id=camt></div></div><div id=app></div><div id=after></div><button id=bkb aria-label="Hide the game" title="Hide the game (Esc)">🫣</button>
 <div id=bkt hidden>🫣 Teacher coming? Tap the face, or press Esc, to hide the game.</div><div id=bk hidden><h2>Year 9 Maths: Fractions Revision</h2><p style="color:#555;margin-top:0">Worksheet 4B. Show your working for every question.</p><p>1. Simplify 18/24, then write it as a decimal.</p><p>2. Work out 2/3 + 3/5. Give your answer as a mixed number where you can.</p><p>3. A recipe needs 3/4 of a cup of flour for 6 muffins. How much flour is needed for 15 muffins?</p><p>4. Put these in order from smallest to largest: 5/8, 0.6, 7/12, 62%.</p><p>5. Explain why 7/9 is greater than 3/4 without using a calculator.</p><div class=pg id=bkx>Page 1 of 2</div></div>
 <script>
 const $=s=>document.querySelector(s),esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
@@ -86,12 +122,14 @@ let me=L.n?{n:L.n,e:L.e}:null,tmp={n:L.n||'',e:L.e||EM[0]},peer,conns={},host=fa
 let CT=-1,CERR='',CW='',CP=[],GK=-1,PP=[],SUBS={},CS={t:-1},PPT=0,PQ=[],SFT=0,SFA={},SFV={t:-1,at:0},SFN='',SFDW=-1,OPENING=0,OT=0,BAN={},GR={};
 const R0=(()=>{try{return sessionStorage.hoproom||''}catch(e){return''}})();
 const Q0=(new URLSearchParams(location.search).get('room')||'').slice(0,4);
-const BKN='<div class=card style="background:var(--mint);padding:12px;margin:12px 0">🫣 <b>Teacher coming?</b> Tap the face in the bottom corner, or press Esc, to hide the game. Tap “Page 1 of 2” to come back.</div>';
+const BKN='<div class=hm-note>🫣 <b>Teacher coming?</b> Tap the face in the bottom corner, or press Esc, to hide the game. Tap “Page 1 of 2” to come back.</div>';
 const N=()=>S.p.length,pName=i=>{const p=S.p.find(p=>p.id===i);return p?p.e+' '+esc(p.n):'?'};
 const chip=p=>`<span class=pl><span class=av>${p.e}</span>${esc(p.n)}${p.z?' 💤':''}</span>`;
 const tal=()=>{const c={};Object.values(S.v||{}).forEach(t=>c[t]=(c[t]||0)+1);return c};
 
 /* ---------- networking: host-authoritative over WebRTC (PeerJS free broker) ---------- */
+const PCFG={config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:global.stun.twilio.com:3478'},{urls:['turn:openrelay.metered.ca:80','turn:openrelay.metered.ca:443','turns:openrelay.metered.ca:443?transport=tcp'],username:'openrelayproject',credential:'openrelayproject'}]}};
+const RT_C={};let PENDV={},CWT=0,CWN=0,CWL=-1,CREC=0;
 let TOFF=0,HW=0,HWG='',IMN=0,TMK='',TMT=0,RESTORE=null,TKO=0;
 const JOINABLE=['sd','ch','pp','sf','ml','qb'],HUI=()=>host&&S.c!=='OPEN',isSpec=()=>!!(S.sp&&S.sp.some(p=>p.id===id))&&!S.p.some(p=>p.id===id);
 const PID=c=>'hopin-party-'+c,rc=()=>[...Array(4)].map(()=>'ABCDEFGHJKLMNPQRSTUVWXYZ'[Math.random()*24|0]).join('');
@@ -100,8 +138,9 @@ function bcast(){if(!S.g&&S.sp&&S.sp.length){S.sp.forEach(q=>{if(!S.p.some(x=>x.
 function send(to,m){if(to!==id&&(m.t==='task'||m.t==='word'))(PV[to]=PV[to]||{})[m.t]=m;to===id?recv(m):conns[to]&&conns[to].open&&conns[to].send(m)}
 function act(m){host?handle(id,m):hc&&hc.open?hc.send(m):q.push(m)}
 function recv(m){
- if(m&&typeof m.t==='string'&&m.t[0]==='~'){try{window.XP&&XP.recv(m)}catch(e){}return}
+ if(m&&typeof m.t==='string'&&m.t[0]==='~'){try{window.CHATM&&CHATM.recv(m)}catch(e){}try{window.XP&&XP.recv(m)}catch(e){}return}
  if(m.t==='hb')return;
+ if(m.t==='camreq'){if(LS&&peer&&m.pi){delete CALLED[m.pi];CALLS=CALLS.filter(c=>{if(c.peer===m.pi){try{c.close()}catch(e){}return false}return true});camUI()}return}
  if(m.t==='ban')return fail('The host removed you from that room.');
  if(m.t==='x')return fail('That game’s already running. Wait for the next one.');
  if(m.t==='S'){S=m.s;TOFF=(S.now||Date.now())-Date.now();if(S.g!=='dp')T=null;if(!S.g)W=null;if(S.g!=='qb')qd=-1;if(S.g!=='im')cd=-1;if(S.g==='qb'&&S.ph==='ans'&&qd!==S.r)myA=''}
@@ -123,7 +162,7 @@ function drop(i){try{conns[i]&&conns[i].close()}catch(e){}delete conns[i];if(S.s
 const wake=()=>{try{navigator.wakeLock.request('screen').catch(()=>{})}catch(e){}};
 document.addEventListener('visibilitychange',()=>{if(document.hidden)return;wake();if(host&&peer&&peer.disconnected)try{peer.reconnect()}catch(e){}if(!host&&room){if(!hc||!hc.open){clearTimeout(RT);RT=0;link()}else hc.send({t:'hb'})}});
 function startHost(c0){
- wake();const code=c0||rc();host=true;peer=new Peer(PID(code));peer.on('call',onCall);
+ wake();const code=c0||rc();host=true;peer=new Peer(PID(code),PCFG);peer.on('call',onCall);
  peer.on('open',i=>{id=i;OPENING=0;TOFF=0;S=RESTORE?restoreS(RESTORE,code):{g:null,ph:'lobby',c:code,cam:1,p:[{id,n:me.n,e:me.e,s:0,sk:2,st:0,pi:id}]};if(RESTORE)S.p.forEach(q=>{seen[q.id]=Date.now()});RESTORE=null;render();HT=setInterval(()=>{const t=Date.now();let ch=0;for(const k in conns)conns[k].open&&conns[k].send({t:'hb'});S.p.forEach(p=>{if(p.id===id)return;const idle=t-(seen[p.id]||t),z=idle>10000?1:0;if((p.z||0)!==z){p.z=z;ch=1}if(idle>300000)drop(p.id)});if(ch)bcast()},4000)});
  peer.on('disconnected',()=>{try{peer.reconnect()}catch(e){}});
  peer.on('connection',c=>c.on('data',m=>{if(m&&m.t==='~peek'){try{c.send({t:'~peek',n:N()})}catch(e){}return}if(m.t==='join'){U[c.peer]=m.u?String(m.u).slice(0,24):c.peer;conns[U[c.peer]]=c;m.pi=c.peer}const f=U[c.peer];if(f)handle(f,m)}));
@@ -132,7 +171,7 @@ function startHost(c0){
 function join(c){room=c.toUpperCase();tries=0;wake();link()}
 function link(){
  const g=++GEN;clearInterval(HT);try{peer&&peer.destroy()}catch(e){}
- peer=new Peer();peer.on('call',onCall);
+ peer=new Peer(undefined,PCFG);peer.on('call',onCall);
  peer.on('open',()=>{if(g!==GEN)return;id=uid;hc=peer.connect(PID(room),{reliable:true});
   hc.on('open',()=>{if(g!==GEN)return;OPENING=0;tries=0;rcn=0;last=Date.now();hc.send({t:'join',n:me.n,e:me.e,u:uid});while(q.length)hc.send(q.shift());HT=setInterval(()=>{hc.open&&hc.send({t:'hb'});if(!document.hidden&&Date.now()-last>15000)reco()},3000);try{sessionStorage.hoproom=room}catch(e){}if(S.p.length)render()});
   hc.on('data',m=>{if(g===GEN){last=Date.now();recv(m)}});
@@ -170,12 +209,13 @@ function armTimer(){
 /* ---------- host game logic ---------- */
 function handle(f,m){
  seen[f]=Date.now();
- if(typeof m.t==='string'&&m.t[0]==='~'){try{window.XP&&XP.host(f,m)}catch(e){}return}
+ if(typeof m.t==='string'&&m.t[0]==='~'){try{window.CHATM&&CHATM.host(f,m)}catch(e){}try{window.XP&&XP.host(f,m)}catch(e){}return}
  if(m.t==='hb')return;
  if(H0(f)&&m.t==='kick'&&m.i!==f){if(m.b)BAN[m.i]=1;return drop(m.i)}
  if(H0(f)&&m.t==='camset'){S.cam=S.cam?0:1;if(!S.cam)S.live=0;return bcast()}
  if(m.t==='join'){if(BAN[f])return send(f,{t:'ban'});const q0=S.p.find(p=>p.id===f);if(q0){q0.pi=m.pi;Object.values(PV[f]||{}).forEach(x=>send(f,x));return bcast()}if(S.g&&!JOINABLE.includes(S.g)){S.sp=S.sp||[];if(!S.sp.some(q=>q.id===f))S.sp.push({id:f,n:String(m.n).slice(0,12),e:EM.includes(m.e)?m.e:EM[0],pi:m.pi});return bcast()}if(!S.p.some(p=>p.id===f)){S.p.push({id:f,n:String(m.n).slice(0,12),e:EM.includes(m.e)?m.e:'🙂',s:0,sk:2,st:0,pi:m.pi});if(S.g==='sd'||S.g==='ch'||S.g==='sf')OR.push(f);if(S.g==='sf'&&S.am)S.am[f]=3;const gr=GR[f];if(gr&&Date.now()-gr.t<1800000){const np=S.p.find(p=>p.id===f);np.s=gr.s;np.sk=gr.sk;np.st=gr.st;delete GR[f]}}return bcast()}
  const G=S.g,H=f===id;
+ if(m.t==='camreq'){const v=S.p.find(p=>p.id===f);if(S.live&&S.who&&S.who!==f&&v&&v.pi&&Date.now()-(RT_C[f]||0)>2500){RT_C[f]=Date.now();send(S.who,{t:'camreq',pi:v.pi})}return}
  if(S.c==='OPEN'&&m.t==='rp'&&S.p.some(p=>p.id===f)&&m.i!==f&&m.i!==id&&S.p.some(p=>p.id===m.i)){const r=(S.rp=S.rp||{}),a=(r[m.i]=r[m.i]||[]);if(!a.includes(f))a.push(f);if(a.length>=Math.max(2,Math.ceil(N()/2))){BAN[m.i]=1;delete r[m.i];return drop(m.i)}return bcast()}
  if(S.c==='OPEN'&&!G&&m.t==='gv'&&S.p.some(p=>p.id===f)&&GM.some(g=>g[0]===m.g)){(S.gv=S.gv||{})[f]=m.g;return gvCheck()}
  if(S.c==='OPEN'&&H&&!G&&m.t==='gvgo'&&N()>=3)return gvStart();
@@ -346,8 +386,14 @@ function imRes(){const c=tal(),mx=Math.max(...Object.values(c)),top=Object.keys(
  S.p.forEach(p=>{if(caught&&p.id!==IM.bad)p.s++;if(!caught&&p.id===IM.bad)p.s+=2});S.bad=IM.bad;S.w=IM.w;S.caught=caught;S.ph='res';bcast()}
 
 /* ---------- views ---------- */
-function vSign(){return `<h1>Hop In 🎈</h1><p>Party games for you and your mates. Free, and there’s no app to download.</p><div class=card><h3>Who are you?</h3><input id=nm maxlength=12 placeholder="Your name" value="${esc(tmp.n)}"><div class=row style="margin:8px 0">${EM.map(e=>`<button class="e ${e===tmp.e?'on':''}" data-a=em data-e="${e}">${e}</button>`).join('')}</div><button class=r data-a=signin>Right, let’s go</button></div>`}
-function vHome(){return `<h1>Hop In 🎈</h1>`+(peer||OPENING?'<p>Connecting…</p>':`<div class=card>${chip(me)}<button data-a=out style="width:auto;display:inline-block;padding:3px 10px;font-size:14px;box-shadow:none">not you?</button><button class=r data-a=host>Start a room</button><h3>Got a code?</h3><input id=cd maxlength=4 value="${esc(Q0)}" placeholder="CODE" style="text-align:center;letter-spacing:8px;text-transform:uppercase"><button class=t data-a=join>Join</button><button data-a=scan>📷 Scan a QR code</button><button class=r data-a=open>🌍 Join the open room</button>${window.ORN==null?'':`<p style="margin:6px 0"><b>${window.ORN?window.ORN+(window.ORN===1?' player is':' players are')+' in the open room now':'Nobody is in the open room yet. Tap to start it.'}</b></p>`}<small>No code needed. Anyone on the site can hop in, so it’s good for mixing classes. Cameras go live to everyone in the room.</small></div>`+(err?`<div class=card>${esc(err)}</div>`:''))}
+const hero=()=>`<div class=hm-hero><h1 class=hm-logo>Hop In <span class=hm-bal>🎈</span></h1><p class=hm-tag2>Party games for you and your mates</p><div class=hm-chips><span>No app</span><span>No sign-up</span><span>Free</span></div></div>`;
+function vSign(){return hero()+`<div class="card hm-who"><h3>Who are you?</h3><input id=nm maxlength=12 placeholder="Your name" value="${esc(tmp.n)}" autocomplete=off><small class=hm-lab>Pick your face</small><div class=hm-em>${EM.map(e=>`<button class="e ${e===tmp.e?'on':''}" data-a=em data-e="${e}">${e}</button>`).join('')}</div><button class=r data-a=signin>Right, let’s go →</button></div>`}
+function vHome(){
+ if(peer||OPENING)return hero()+`<div class="card hm-wait"><div class=hm-spin></div><b>Connecting…</b><small>Hang tight, this only takes a moment.</small></div>`;
+ const n=window.ORN,pill=n==null?'':n?`<span class=hm-live><i></i>${n} ${n===1?'player is':'players are'} in there now</span>`:`<span class="hm-live off">Empty right now. Be the first!</span>`;
+ return hero()+`<div class=hm-me>${chip(me)}<button data-a=out class=hm-link>not you?</button></div>
+ <div class="card hm-open"><span class=hm-tg>🌍 NO CODE NEEDED</span><h2>Open room</h2><p>No host, no code. Jump in, vote for a game, and play with whoever else is there.</p>${pill}<button data-a=open>Join the open room →</button></div>
+ <div class="card hm-priv"><h3>🔑 Private room</h3><button class=t data-a=host>Start a room</button><div class=hm-or><span>or join one</span></div><div class=hm-code><input id=cd maxlength=4 value="${esc(Q0)}" placeholder="CODE" autocomplete=off><button class=r data-a=join>Join</button></div><button data-a=scan>📷 Scan a QR code</button></div>`+(err?`<div class="card hm-err">⚠️ ${esc(err)}</div>`:'')}
 function vLobby(){return `<h2>${S.c==='OPEN'?'Open room 🌍':'Room '+S.c}</h2><div class=card style="text-align:center"><div class=big>${S.c}</div><div id=qr style="display:inline-block;padding:8px;background:#fff;margin-top:10px"></div><br><small>${S.c==='OPEN'?'Other classes can join from the home screen with “Join the open room”. No code needed.':'Scan this, or type the code in at '+esc(location.host)}</small></div><div class=card><h3>Players (${N()})</h3>${S.p.map(p=>chip(p)+(S.c==='OPEN'&&p.id!==id&&p.id!==PID('OPEN')?`<button data-a=rp data-i="${p.id}" title="Flag this player. If most players flag them, they’re removed." style="width:auto;display:inline-block;padding:2px 8px;font-size:13px;box-shadow:none">🚩${(S.rp&&S.rp[p.id]||[]).length||''}</button>`:'')+(HUI()&&p.id!==id?`<button data-a=ban data-i="${p.id}" style="width:auto;display:inline-block;padding:2px 8px;font-size:13px;box-shadow:none">remove</button>`:'')).join('')}</div>`+lobbyPick()}
 function lobbyPick(){
  const cam='<div class=card style="background:var(--sun)"><b>📷 The camera is automatic in Dare Duty, Live Charades, Punishment Roulette and Stone Face.</b><br><small>It switches on by itself on your turn (your browser asks for permission).</small></div>';
@@ -478,30 +524,36 @@ const howOn=()=>HW===1||(HW!==2&&isFirst());
 const howCard=()=>{const g=GM.find(x=>x[0]===S.g);return howOn()?`<div class=card style="background:var(--sun)"><b>📖 How to play ${g[1]} ${g[2]}</b><ol>${HOW[S.g].map(x=>`<li>${x}</li>`).join('')}</ol><small>⏱ ${TIMES[S.g]}. The bar at the top counts down, and the game moves on by itself when it runs out.</small></div>`:''};
 const howBtn=()=>`<button data-a=how style="width:auto;display:inline-block;padding:4px 12px;font-size:14px;box-shadow:none">${howOn()?'✖ Hide the rules':'❓ How to play'}</button>`;
 function vSpec(){const g=GM.find(x=>x[0]===S.g);return `<h2>👀 You’re watching</h2><div class=card style="background:var(--mint)"><b>${g[1]} ${g[2]}</b> is already running.<br><small>This game can’t be joined halfway through, so you’re a spectator. You’ll be added to the next game automatically.</small></div>`+tmrHtml()+`<div class=card><b>Right now:</b> ${esc(S.tl||'Players are playing')}</div>`+board()}
-const HOMEHOW=`<div class=card><h3>How it works</h3>
-<p><b>🌍 Open room:</b> no host and no code. Tap the button, vote for a game, and it starts by itself once everyone has voted (or 25 seconds after the first vote, with at least 3 players). Every game runs on timers.</p>
-<p><b>Joining halfway:</b> you can jump into most games while they’re running. Doodle Chain and Imposter can’t be joined midway, so you’ll watch as a spectator and join the next game automatically.</p>
-<p><b>🔑 Private room:</b> make your own room and share the 4-letter code or QR code. You’re the host and you pick the games.</p>
-<p><b>📷 Cameras:</b> some games switch your camera on for your turn. Your browser asks permission first.</p>
-<p><b>🚩 Safety:</b> in the open room, if most players flag someone, they’re removed.</p></div>`;
+const HOMEHOW=`<details class="card hm-how"><summary>❓ How it works</summary>
+<div class=hm-hl><span>🌍</span><p><b>Open room:</b> no host and no code. Vote for a game and it starts by itself once everyone has voted, or 25 seconds after the first vote (3 or more players). Every game runs on timers.</p></div>
+<div class=hm-hl><span>🔑</span><p><b>Private room:</b> make your own, then share the 4-letter code or QR code. You’re the host and you pick the games.</p></div>
+<div class=hm-hl><span>🚪</span><p><b>Joining halfway:</b> you can jump into most games while they run. Doodle Chain and Imposter can’t be joined midway, so you’ll watch and join the next game automatically.</p></div>
+<div class=hm-hl><span>📷</span><p><b>Cameras:</b> some games switch your camera on for your turn. Your browser asks permission first.</p></div>
+<div class=hm-hl><span>🚩</span><p><b>Safety:</b> in the open room, if enough players flag someone, they’re removed.</p></div></details>`;
 const vGame=()=>{if(HWG!==S.g){HWG=S.g;HW=0}if(isSpec())return vSpec();return howBtn()+tmrHtml()+howCard()+({dp:vDp,ml:vMl,im:vIm,qb:vQb,sd:vSd,ch:vCh,pp:vPp,sf:vSf}[S.g])()+board()+(HUI()?'<button data-a=home>Back to lobby</button>':'')};
 
-async function autoCam(){const t=S.t;try{const s=await navigator.mediaDevices.getUserMedia({video:{width:{ideal:320},height:{ideal:240},frameRate:{ideal:15}},audio:true});if(!(camOn()&&S.who===id&&S.t===t)){s.getTracks().forEach(x=>x.stop());return}LS=s;CERR='';act({t:'live',on:1})}catch(e){CERR='The camera didn’t start. Allow camera and mic access in your browser, then try again.'}render()}
-function onCall(c){const d=S.p.find(p=>p.id===S.who);if(!((S.g==='sd'||S.g==='ch'||S.g==='pp'||S.g==='sf')&&S.cam&&S.who!==id&&d&&d.pi===c.peer))return;c.answer();c.on('stream',s=>{VS=s;camUI()})}
+async function autoCam(){const t=S.t;try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user',width:{ideal:320},height:{ideal:240},frameRate:{ideal:15}},audio:true});if(!(camOn()&&S.who===id&&S.t===t)){s.getTracks().forEach(x=>x.stop());return}LS=s;CERR='';s.getVideoTracks().forEach(vt=>{vt.onended=()=>setTimeout(camRecover,500);vt.onmute=()=>setTimeout(()=>{if(vt.muted&&LS===s)camRecover()},3000)});act({t:'live',on:1})}catch(e){CERR='The camera didn’t start. Allow camera and mic access in your browser, then try again.'}render()}
+function camRecover(){if(!(camOn()&&S.who===id)||CREC>=3)return;CREC++;try{LS&&LS.getTracks().forEach(t=>t.stop())}catch(e){}LS=null;CALLED={};CALLS.forEach(c=>{try{c.close()}catch(e){}});CALLS=[];autoCam()}
+document.addEventListener('visibilitychange',()=>{try{if(!document.hidden&&LS&&S.who===id&&camOn()){const t=LS.getVideoTracks()[0];if(!t||t.readyState!=='live')camRecover()}}catch(e){}});
+function onCall(c){if(!((S.g==='sd'||S.g==='ch'||S.g==='pp'||S.g==='sf')&&S.cam&&S.who!==id&&S.p.some(p=>p.pi===c.peer)))return;c.answer();c.on('stream',s=>{PENDV[c.peer]=s;const d=S.p.find(p=>p.id===S.who);if(!d||d.pi===c.peer)VS=s;camUI()})}
 const camOn=()=>S.cam&&(((S.g==='sd'||S.g==='ch'||S.g==='sf')&&S.ph==='go')||(S.g==='pp'&&S.ph==='pun'));
 function camUI(){
  const on=camOn(),mine=S.who===id;
  if(!(on&&mine))CT=-1;else if(!LS&&CT!==S.t){CT=S.t;autoCam()}
  if(LS&&!(on&&mine)){LS.getTracks().forEach(t=>t.stop());LS=null;CALLED={};CALLS.forEach(c=>{try{c.close()}catch(e){}});CALLS=[]}
- if(VS&&!(on&&!mine))VS=null;
+ if(VS&&!(on&&!mine)){VS=null;PENDV={}}
+ {const wd=S.p.find(p=>p.id===S.who);if(on&&!mine&&!LS&&wd&&PENDV[wd.pi]&&VS!==PENDV[wd.pi])VS=PENDV[wd.pi]}
+ if(!(on&&mine))CREC=0;
  if(LS&&S.live&&peer)S.p.forEach(p=>{if(p.id!==id&&p.pi&&!p.z&&!CALLED[p.pi]){CALLED[p.pi]=1;try{CALLS.push(peer.call(p.pi,LS))}catch(e){}}});
  const w=$('#camw'),v=$('#rv'),src=LS||VS;if(!w||!v)return;
  w.hidden=!(on&&(src||S.live));
  if(v.srcObject!==src){v.srcObject=src;v.muted=!!LS;if(src&&v.play)v.play().catch(()=>{v.muted=true;v.play().catch(()=>{});$('#camt').textContent='🔴 Live. Tap the video for sound'})}
- if(!v.onclick)v.onclick=()=>{v.muted=!!LS;v.play()};
- if(src||S.live)$('#camt').textContent=LS?'🔴 You’re live. Everyone can see and hear you.':VS?'🔴 Live':'Connecting to their camera…'
+ if(!v.onclick)v.onclick=()=>{v.muted=!!LS;v.play().catch(()=>{});if(!LS&&S.live)act({t:'camreq'})};
+ if(on&&!mine&&S.live){if(!CWT){CWN=0;CWL=-1;CWT=setInterval(()=>{try{const vv=$('#rv');if(!(camOn()&&S.live&&S.who!==id)){clearInterval(CWT);CWT=0;return}const t=vv?vv.currentTime:0,good=!!(VS&&vv&&vv.videoWidth>0&&!vv.paused&&t!==CWL);CWL=t;if(good){CWN=0;return}if(vv&&VS)vv.play().catch(()=>{});if(CWN++<6)act({t:'camreq'})}catch(e){}},3500)}}else if(CWT){clearInterval(CWT);CWT=0}
+ if(src||S.live)$('#camt').textContent=LS?'🔴 You’re live. Everyone can see and hear you.':VS?'🔴 Live. Black screen? Tap the video.':'Connecting to their camera… tap the video to retry'
 }
 function render(){
+ document.body.classList.toggle('hm',!S.p.length);
  camUI();if(S.g!=='pp')CS={t:-1};else if(S.ph==='play'&&CS.t!==S.t)ppStart();
  if(shown>=0&&T&&!T.done&&shown===T.r&&T.r===S.r&&S.g==='dp'&&S.ph==='play')return;
  if(qs===S.r&&S.g==='qb'&&S.ph==='ans'&&qd!==S.r)return;
@@ -509,7 +561,8 @@ function render(){
  if(S.g==='sf'&&S.ph==='go'&&SFDW===S.t&&$('#cv'))return;
  shown=-1;qs=-1;cs=-1;
  const kp=['gs','pi','sft'].map(i=>{const e=$('#'+i);return e?{i,v:e.value,f:document.activeElement===e,k:i==='pi'||i==='sft'||GK===S.t}:null}).filter(Boolean);
- $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby())+(S.g?'':BKN)+(me&&!S.p.length?HOMEHOW:'')+'<p><small>build 28</small></p>';
+ $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby());
+ $('#after').innerHTML=(S.g?'':BKN)+(me&&!S.p.length?HOMEHOW:'')+'<p class=hm-foot><small><span data-cl="open" style="text-decoration:underline;cursor:pointer">build 32 · What’s new</span></small></p>';
  if($('#qr')&&window.QRCode)new QRCode($('#qr'),{text:location.href.split(/[?#]/)[0]+'?room='+S.c,width:230,height:230,correctLevel:QRCode.CorrectLevel.L});
  if($('#cv'))initCv();
  GK=$('#gs')?S.t:-1;kp.forEach(o=>{const e=$('#'+o.i);if(e&&o.k){if(o.v)e.value=o.v;if(o.f){e.focus();try{e.setSelectionRange(e.value.length,e.value.length)}catch(x){}}}});ppBind();
@@ -608,9 +661,9 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
 (function(){
  if(/[?&]safe=1/.test(location.search))return;
  const KEY='hopx',RXE=['👏','😂','🔥','💀','❤️'],
- FEATS=[['chat','💬 Chat','Message everyone in the room.'],['rx','🎉 Reactions','Tap an emoji and it floats up on everyone’s screen.'],['a2hs','📲 Add to home screen','Put Hop In on your phone like an app: full screen, no browser bars.'],['disguise','🏫 School disguise','Renames the site and the games to look like a study app, with calm colours. Only changes your own screen.']],
+ FEATS=[['rx','🎉 Reactions','Tap an emoji and it floats up on everyone’s screen.'],['a2hs','📲 Add to home screen','Put Hop In on your phone like an app: full screen, no browser bars.'],['disguise','🏫 School disguise','Renames the site and the games to look like a study app, with calm colours. Only changes your own screen.']],
  BAD=/\b(f+u+c+k+\w*|sh[i1]+t+\w*|b[i1]tch\w*|cunt\w*|d[i1]ck\w*|a+ss+h[o0]le\w*|bastard\w*|p[i1]ss\w*|sl[u]+t+\w*|wh[o0]re\w*)\b/gi;
- let cfg={chat:0,rx:0,a2hs:0,disguise:0,dg:0};try{Object.assign(cfg,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+ let cfg={chat:0,rx:0,a2hs:0,disguise:0,dg:0};try{Object.assign(cfg,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}cfg.chat=0;
  const ERR=[],FAIL={chat:0,rx:0,a2hs:0,disguise:0},LOG=[],RT={},CT={};let CH=[],CHO=0,UN=0,TS=null;
  const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(cfg))}catch(e){}};
  const E=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -651,12 +704,13 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
   {n:'Class Portal',e:'🏫',t:'student portal',bg:'#eaf1f7',ac:'#cfe0ee',sec:'#e1ede6',dk:'#1f4e79'},
   {n:'Homework Helper',e:'✏️',t:'homework tools',bg:'#fbf6e6',ac:'#f3e3b3',sec:'#e4ecd6',dk:'#6b4f1d'}];
  const GAMEN=[['Doodle Chain','Sketch Notes'],['Most Likely To','Class Survey'],['Imposter','Odd One Out'],['Quick Brain','Quick Quiz'],['Dare Duty','Challenge Cards'],['Live Charades','Vocab Charades'],['Punishment Roulette','Penalty Review'],['Stone Face','Focus Drill']];
+ const TITLE0=document.title;
  let CURD=null,DOBS=null,TOBS=null,DICON=null,DICO0=null,DSTY=null;
  const pairsFor=d=>[['Join the open room','Join a study group'],['open room','study group'],['Open room','Study group'],['Private room','Private class'],['Big call','Study call'],['Party games','Study games'],['your mates','your classmates'],...GAMEN,['Hop In',d.n],['🎈',d.e],['Scores','Marks']].sort((a,b)=>b[0].length-a[0].length);
  const dgText=str=>{const d=CURD||DIS[(cfg.dg|0)%DIS.length];let v=String(str);for(const[a,b]of pairsFor(d))v=v.split(a).join(b);return v};
  function dgSwap(root,rev){if(!root)return;const d=CURD||DIS[(cfg.dg|0)%DIS.length];let pr=pairsFor(d);if(rev)pr=pr.map(([a,b])=>[b,a]).sort((a,b)=>b[0].length-a[0].length);
   const w=document.createTreeWalker(root,4);let n;while((n=w.nextNode())){const o=n.nodeValue;let v=o;for(const[a,b]of pr)v=v.split(a).join(b);if(v!==o)n.nodeValue=v}}
- const dgAll=rev=>{dgSwap($x('#app'),rev);dgSwap($x('#ca'),rev)};
+ const dgAll=rev=>{dgSwap($x('#app'),rev);dgSwap($x('#ca'),rev);dgSwap($x('#after'),rev)};
  function dgIcon(e){const c=document.createElement('canvas');c.width=c.height=64;const g=c.getContext('2d');g.font='52px sans-serif';g.textAlign='center';g.textBaseline='middle';g.fillText(e,32,36);return c.toDataURL('image/png')}
  function dgTitle(){const d=CURD;if(!d)return;const want=d.n+' - '+d.t;if(document.title!=='Fractions Revision'&&document.title!==want)document.title=want}
  function dgOn(){
@@ -674,7 +728,7 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
   try{dgAll(true)}catch(e){}
   if(DSTY){try{DSTY.remove()}catch(e){}DSTY=null}
   try{if(DICON&&DICO0!==null)DICON.setAttribute('href',DICO0)}catch(e){}
-  if(CURD){document.title='Hop In - party games'}
+  if(CURD){document.title=TITLE0}
   CURD=null;try{if(typeof render==='function')render()}catch(e){}}
  if(cfg.disguise){try{dgOn()}catch(e){note('disguise',e)}}
  // ---- Add to home screen: only does anything while its switch is ON ----
@@ -759,8 +813,11 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
  const inRoom=()=>typeof S!=='undefined'&&S&&S.p&&S.p.length>0;
  const say=t=>{['#cerr','#cerr2'].forEach(i=>{const e=$c(i);if(e)e.textContent=t||''})};
  const css=document.createElement('style');
- css.textContent=`#ca{margin:0 auto 90px;width:calc(100% - 24px);max-width:560px}
- #ca .cabox{background:#fff;color:#111;border:3px solid var(--ink,#111);border-radius:16px;box-shadow:4px 4px 0 var(--ink,#111);padding:14px;margin-top:14px}
+ css.textContent=`#ca{margin:0 auto;width:calc(100% - 32px);max-width:448px}
+ #ca .cabox{background:#fff;color:#111;border:3px solid var(--ink,#111);border-radius:14px 22px 12px 20px;box-shadow:6px 6px 0 var(--ink,#111);padding:16px;margin-top:18px}
+ #ca-out{background:var(--mint,#5ee6b0)!important}#ca h3{font-family:'Bagel Fat One',system-ui,sans-serif;font-weight:400;font-size:24px;line-height:1.05}
+ #ca .cpill{display:inline-block;background:#fff;border:2px solid var(--ink,#111);border-radius:999px;padding:2px 12px;font-weight:800}
+ #ca .jr{display:flex;gap:8px;margin-top:8px}#ca .jr button{flex:1;margin:0;text-align:center;font-size:15px}
  #ca [hidden]{display:none!important}#ca h3{margin:0 0 6px}
  #cg{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin:10px 0}
  #cg .ct{position:relative}#cg video{width:100%;aspect-ratio:4/3;object-fit:cover;background:#222;border:3px solid var(--ink,#111);border-radius:10px;display:block}
@@ -769,9 +826,9 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
  document.head.appendChild(css);
  const root=document.createElement('div');root.id='ca';root.hidden=true;
  root.innerHTML=`<div id=ca-out class=cabox><h3>📞 Big call</h3>
-  <p style="margin:4px 0"><b id=cn>👥 …</b> <small>in the call now (max ${MAX})</small></p>
+  <p style="margin:6px 0 8px"><span class=cpill><b id=cn>👥 …</b></span> <small>in the call now (max ${MAX})</small></p>
   <small>Anyone who finds this page can join, so don’t share personal info. Your mic starts muted. Joining a game room leaves the call.</small>
-  <button class=r data-c=j1>📹 Join with camera</button><button data-c=j0>👀 Join without camera</button><small id=cerr></small></div>
+  <div class=jr><button class=r data-c=j1>📹 With camera</button><button data-c=j0>👀 Just watch</button></div><small id=cerr></small></div>
  <div id=ca-in class=cabox hidden><h3>📞 Big call · 👥 <span id=cn2></span></h3><div id=cg></div>
   <div class=crow><button data-c=mic id=cmic>🎤 Mic off</button><button data-c=cam id=ccam>📹 Camera on</button><button data-c=lv>Leave</button></div><small id=cerr2></small></div>`;
  {const app=$c('#app');if(app&&app.after)app.after(root);else document.body.appendChild(root)}
@@ -780,7 +837,7 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
  function onUnavail(id,fn){(waiting[id]=waiting[id]||[]).push(fn)}
  function ensurePeer(){
   if(cp||!window.Peer)return;
-  const p=cp=new Peer();
+  const p=cp=new Peer(undefined,typeof PCFG!=='undefined'?PCFG:undefined);
   p.on('open',id=>{if(cp===p){myId=id;ready=1}});
   p.on('error',e=>{if(cp!==p)return;
    if(e.type==='peer-unavailable'){const msg=String(e.message||'');Object.keys(waiting).forEach(id=>{if(msg.includes(id)){const a=waiting[id];waiting[id]=[];a.forEach(f=>{try{f()}catch(x){}})}})}
@@ -838,7 +895,7 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
   setTimeout(()=>{if(inCall&&hubC===c&&!c.open){hubC=null;claimHub()}},7000)}
  function claimHub(){
   if(!inCall||hubPeer||!window.Peer)return;
-  const hp=new Peer(HUB);hubPeer=hp;
+  const hp=new Peer(HUB,typeof PCFG!=='undefined'?PCFG:undefined);hubPeer=hp;
   hp.on('open',()=>{if(hubPeer!==hp)return;HL=new Map();HC={};const u=mine();HL.set(myId,{id:myId,n:u.n,e:u.e});hp.on('connection',hubConn);pushList()});
   hp.on('error',e=>{if(e.type==='unavailable-id'){try{hp.destroy()}catch(x){}if(hubPeer===hp)hubPeer=null;setTimeout(connectHub,500)}});
   hp.on('disconnected',()=>{try{hp.reconnect()}catch(x){}})}
@@ -893,6 +950,186 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
  }catch(e){}},1000);
  window.CALLDBG={join:joinCall,leave,poll,state:()=>({inCall,n:list.length,calls:Object.keys(calls),tiles:Object.keys(tiles),hub:!!hubPeer,CN,myId})};
 })();
+</script>
+
+<script>
+/* ===== Chat (permanent): messages, photos, reactions and notifications =====
+   Works through the same room connection as the games, in every room. The phone running the room relays
+   messages, keeps the last 40, and applies the safety rules (spam limits, swear filter, photo reports). */
+(function(){
+ const EMO=['👍','❤️','😂','😮','😢'],KEY='hopchat',MAXI=110000;
+ const BAD=/\b(f+u+c+k+\w*|sh[i1]+t+\w*|b[i1]tch\w*|cunt\w*|d[i1]ck\w*|a+ss+h[o0]le\w*|bastard\w*|p[i1]ss\w*|sl[u]+t+\w*|wh[o0]re\w*)\b/gi;
+ const $h=s=>document.querySelector(s),E=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ let prefs={bell:0};try{Object.assign(prefs,JSON.parse(localStorage.getItem(KEY)||'{}'))}catch(e){}
+ const savePrefs=()=>{try{localStorage.setItem(KEY,JSON.stringify(prefs))}catch(e){}};
+ let CH=[],OPENP=0,UN=0,PICK='',REV={},wasIn=false,actx=null,toastT=0,first=true;
+ // host-side memory
+ const LOG=[],RL={},STR={},MUTED={},REP={};
+ const inRoom=()=>typeof S!=='undefined'&&S&&S.p&&S.p.length>0;
+ const everyone=()=>(S.p||[]).concat(S.sp||[]);
+ const mid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+ const css=document.createElement('style');
+ css.textContent=`#hc button{display:inline-block;width:auto;margin:0;padding:6px 10px;font:inherit;font-weight:700;color:#111;background:#fff;border:3px solid #111;border-radius:12px;box-shadow:2px 2px 0 #111;cursor:pointer}
+ #hc [hidden]{display:none!important}
+ #hcb{position:fixed;right:12px;bottom:62px;z-index:90;width:42px;height:42px;padding:0!important;border-radius:50%!important;font-size:20px}
+ #hcu{position:absolute;top:-6px;right:-6px;background:#ff4d8d;color:#fff;border:2px solid #111;border-radius:10px;font-size:11px;padding:0 5px;line-height:16px;font-weight:700}#hcu:empty{display:none}
+ #hct{position:fixed;top:10px;left:12px;right:12px;z-index:94;background:#151515;color:#fff;border-radius:12px;padding:10px 14px;font:700 14px/1.3 system-ui,sans-serif;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:520px;margin:0 auto}
+ #hcp{position:fixed;left:0;right:0;bottom:0;z-index:95;background:#fff;color:#111;border-top:3px solid #111;padding:10px 12px max(10px,env(safe-area-inset-bottom));display:flex;flex-direction:column;gap:8px;font-size:15px;max-height:72vh}
+ #hcp .hh2{display:flex;justify-content:space-between;align-items:center;gap:8px}#hcp .hh2 span{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+ #hcl{overflow:auto;min-height:120px;flex:1}
+ .hm{margin:8px 0;word-break:break-word}.hm .who{font-weight:700}.hm .tx{margin:2px 0}
+ .hm img{display:block;max-width:min(260px,70vw);border:3px solid #111;border-radius:10px;margin:4px 0}
+ .hci{position:relative;display:inline-block;cursor:pointer}.hci img.bl{filter:blur(16px)}.hci .cv{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;text-shadow:0 1px 3px #000;font-size:13px;text-align:center;padding:8px}
+ .hrx{display:flex;flex-wrap:wrap;gap:4px;align-items:center;margin-top:3px}
+ .hrx button{padding:1px 8px!important;font-size:13px;box-shadow:none!important;border-width:2px!important;border-radius:10px!important}.hrx button.me{background:#cfe9ff}
+ .hmini{font-size:12px;opacity:.75}
+ #hcp .hr{display:flex;gap:6px}#hci2{flex:1;min-width:0;margin:0;padding:8px;font:inherit;border:3px solid #111;border-radius:10px}`;
+ document.head.appendChild(css);
+ const root=document.createElement('div');root.id='hc';
+ root.innerHTML=`<button id=hcb data-h=open hidden aria-label="Chat">💬<b id=hcu></b></button><div id=hct hidden></div>
+ <div id=hcp hidden><div class=hh2><b>💬 Chat</b><span><button data-h=bell id=hbell>🔔 Off</button><button data-h=tog id=htog hidden></button><button data-h=close>Close</button></span></div>
+ <div id=hcl></div><div class=hr><button data-h=photo aria-label="Send a photo">📷</button><input id=hci2 maxlength=120 placeholder="Say something kind" autocomplete=off><button data-h=send>Send</button></div>
+ <input id=hfile type=file accept="image/*" hidden><small id=hnote>Everyone in the room can read this. Photos are blurred until you tap them. Keep it kind.</small></div>`;
+ document.body.appendChild(root);
+
+ // ---------- sounds & notifications (all off by default in class) ----------
+ function beep(){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=880;g.gain.value=.08;o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+.12)}catch(e){}}
+ function bellUI(){const b=$h('#hbell');if(b)b.textContent=prefs.bell?'🔔 On':'🔔 Off'}
+ function toast(m){if(OPENP)return;const t=$h('#hct');if(!t)return;t.textContent='💬 '+m.e+' '+m.n+': '+(m.x?m.x.slice(0,60):'sent a photo');t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true},4500)}
+ function notify(m){
+  if(m.by===id)return;UN+=OPENP?0:1;badge();toast(m);
+  if(prefs.bell){beep();try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}
+   try{if(document.hidden&&window.Notification&&Notification.permission==='granted')new Notification(m.n+': '+(m.x||'sent a photo'),{tag:'hopchat'})}catch(e){}}}
+ function badge(){const u=$h('#hcu');if(u)u.textContent=UN?(UN>9?'9+':String(UN)):''}
+
+ // ---------- drawing ----------
+ const find=i=>CH.find(m=>m.mid===i);
+ function rxHtml(m){
+  const r=m.r||{},chips=Object.keys(r).filter(k=>r[k]&&r[k].length).map(k=>`<button data-h=rx data-m="${m.mid}" data-e="${k}" class="${r[k].includes(id)?'me':''}">${k} ${r[k].length}</button>`).join('');
+  const pk=PICK===m.mid?EMO.map(k=>`<button data-h=rx data-m="${m.mid}" data-e="${k}">${k}</button>`).join(''):`<button data-h=pick data-m="${m.mid}" aria-label="Add a reaction">😀+</button>`;
+  return `<div class=hrx>${chips}${pk}</div>`}
+ function imgHtml(m){
+  if(m.rm)return '<div class=hmini>🚫 Photo removed after reports.</div>';
+  if(!m.img)return m.hasImg?'<div class=hmini>📷 Older photo (no longer available).</div>':'';
+  const open=REV[m.mid]||m.by===id;
+  return `<div class=hci data-h=reveal data-m="${m.mid}"><img class="${open?'':'bl'}" src="${m.img}" alt="photo">${open?'':'<div class=cv>Tap to view this photo</div>'}</div>`+(open&&m.by!==id?` <button data-h=rep data-m="${m.mid}" style="font-size:12px;padding:1px 8px!important;box-shadow:none!important">🚩 Report photo</button>`:'')}
+ function draw(){
+  const l=$h('#hcl');if(!l)return;const near=l.scrollHeight-l.scrollTop-l.clientHeight<80;
+  l.innerHTML=CH.map(m=>`<div class=hm><span class=who>${E(m.e)} ${E(m.n)}</span>${m.x?`<div class=tx>${E(m.x)}</div>`:''}${imgHtml(m)}${rxHtml(m)}</div>`).join('')||'<small>No messages yet. Say hi!</small>';
+  if(near||first)l.scrollTop=l.scrollHeight;first=false}
+ function ui(){
+  const off=typeof S!=='undefined'&&S&&S.chat===false,inr=inRoom();
+  $h('#hcb').hidden=!inr||(off&&!(typeof host!=='undefined'&&host&&S.c!=='OPEN'));
+  const tg=$h('#htog');tg.hidden=!(typeof host!=='undefined'&&host&&S.c!=='OPEN'&&inr);tg.textContent=off?'Turn chat on':'Turn chat off';
+  $h('#hci2').disabled=off;$h('#hci2').placeholder=off?'Chat is off':'Say something kind';
+  if(!inr){$h('#hcp').hidden=true;OPENP=0}
+  if(inr&&!wasIn){CH=[];first=true;try{act({t:'~mhist'})}catch(e){}}
+  wasIn=inr}
+
+ // ---------- the phone running the room ----------
+ function clip(m){const n=LOG.length;return LOG.map((x,i)=>({mid:x.mid,by:x.by,n:x.n,e:x.e,x:x.x,ts:x.ts,r:x.r,rm:x.rm,img:(x.img&&i>=n-6)?x.img:'',hasImg:!!x.img}))}
+ function relay(o){everyone().forEach(p=>{try{send(p.id,o)}catch(e){}})}
+ function xHost(f,m){
+  const t=m.t,pl=(S.p||[]).concat(S.sp||[]).find(p=>p.id===f);
+  if(t==='~mhist'){if(pl)send(f,{t:'~mhist',l:clip()});return}
+  if(t==='~mtog'){if(f===id&&S.c!=='OPEN'){S.chat=S.chat===false;bcast()}return}
+  if(!pl||S.chat===false)return;
+  const now=Date.now();
+  if(t==='~msg'){
+   if(MUTED[f]){send(f,{t:'~mmute'});return}
+   let x=String(m.x||'').trim().slice(0,120).replace(BAD,'***'),img='';
+   if(m.img){img=String(m.img);if(!img.startsWith('data:image/jpeg;base64,')||img.length>MAXI*1.4){img=''}}
+   if(!x&&!img)return;
+   const key=img?'i':'t';if(now-(RL[f+key]||0)<(img?4000:1200))return;RL[f+key]=now;
+   const o={mid:mid(),by:f,n:pl.n,e:pl.e,x,img,ts:now,r:{}};LOG.push(o);while(LOG.length>40)LOG.shift();relay({t:'~mnew',m:o});return}
+  if(t==='~mrx'){const o=LOG.find(x=>x.mid===m.mid);if(!o||!EMO.includes(m.emo)||now-(RL[f+'r']||0)<250)return;RL[f+'r']=now;
+   const a=(o.r[m.emo]=o.r[m.emo]||[]),i=a.indexOf(f);if(i<0)a.push(f);else a.splice(i,1);if(!a.length)delete o.r[m.emo];relay({t:'~mupd',mid:o.mid,r:o.r,rm:o.rm});return}
+  if(t==='~mrep'){const o=LOG.find(x=>x.mid===m.mid);if(!o||!o.img||o.by===f)return;const s=(REP[o.mid]=REP[o.mid]||[]);if(!s.includes(f))s.push(f);
+   if(s.length>=Math.max(2,Math.ceil((S.p||[]).length/3))){o.img='';o.rm=1;STR[o.by]=(STR[o.by]||0)+1;if(STR[o.by]>=2){MUTED[o.by]=1;send(o.by,{t:'~mmute'})}relay({t:'~mupd',mid:o.mid,r:o.r,rm:1})}}}
+ function xRecv(m){
+  if(m.t==='~mnew'){const o=m.m;if(!find(o.mid)){CH.push(o);CH=CH.slice(-60);draw();notify(o)}return}
+  if(m.t==='~mupd'){const o=find(m.mid);if(o){o.r=m.r||{};if(m.rm){o.rm=1;o.img=''}draw()}return}
+  if(m.t==='~mhist'){const have=new Set(CH.map(x=>x.mid));(m.l||[]).forEach(o=>{const c=find(o.mid);if(c){c.r=o.r||{};if(o.rm){c.rm=1;c.img=''}}else if(!have.has(o.mid))CH.push(o)});CH.sort((a,b)=>(a.ts||0)-(b.ts||0));CH=CH.slice(-60);draw();return}
+  if(m.t==='~mmute'){const t=$h('#hct');t.textContent='🔇 You’ve been muted from chat because your photos were reported.';t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true},6000)}}
+ window.CHATM={host:(f,m)=>{try{xHost(f,m)}catch(e){}},recv:m=>{try{xRecv(m)}catch(e){}},dbg:()=>({CH,LOG,UN})};
+
+ // ---------- sending ----------
+ const send1=()=>{const i=$h('#hci2');const v=i.value.trim();if(!v||i.disabled)return;i.value='';act({t:'~msg',x:v})};
+ async function shrink(file){
+  const url=URL.createObjectURL(file),img=new Image();
+  await new Promise((res,rej)=>{img.onload=res;img.onerror=()=>rej(new Error('bad'));img.src=url});
+  const k=Math.min(1,480/Math.max(img.width,img.height)),c=document.createElement('canvas');c.width=Math.max(1,Math.round(img.width*k));c.height=Math.max(1,Math.round(img.height*k));
+  c.getContext('2d').drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);
+  let q=.6,d=c.toDataURL('image/jpeg',q);while(d.length>MAXI&&q>.3){q-=.1;d=c.toDataURL('image/jpeg',q)}
+  if(d.length>MAXI*1.3)throw new Error('big');return d}
+ $h('#hfile').addEventListener('change',async e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
+  const n=$h('#hnote');try{n.textContent='Sending photo…';act({t:'~msg',img:await shrink(f),x:$h('#hci2').value.trim()});$h('#hci2').value='';n.textContent='Photo sent. Photos are blurred until people tap them.'}catch(err){n.textContent='That photo couldn’t be sent. Try a different one.'}});
+ root.addEventListener('click',e=>{const b=e.target.closest&&e.target.closest('[data-h]');if(!b)return;const a=b.dataset.h,mi=b.dataset.m;
+  try{
+   if(a==='open'){OPENP=1;UN=0;badge();$h('#hcp').hidden=false;$h('#hct').hidden=true;bellUI();try{act({t:'~mhist'})}catch(x){}first=true;draw();setTimeout(()=>{try{$h('#hci2').focus()}catch(x){}},60)}
+   else if(a==='close'){OPENP=0;$h('#hcp').hidden=true}
+   else if(a==='send')send1();
+   else if(a==='photo')$h('#hfile').click();
+   else if(a==='pick'){PICK=mi;draw()}
+   else if(a==='rx'){PICK='';act({t:'~mrx',mid:mi,emo:b.dataset.e});draw()}
+   else if(a==='reveal'){const o=find(mi);if(o&&!REV[mi]&&o.by!==id){REV[mi]=1;draw()}}
+   else if(a==='rep'){act({t:'~mrep',mid:mi});b.textContent='🚩 Reported';b.disabled=true}
+   else if(a==='tog')act({t:'~mtog'})
+   else if(a==='bell'){prefs.bell=prefs.bell?0:1;savePrefs();bellUI();if(prefs.bell){beep();try{window.Notification&&Notification.permission==='default'&&Notification.requestPermission()}catch(x){}}}
+  }catch(err){}});
+ $h('#hci2').addEventListener('keydown',e=>{if(e.key==='Enter')send1()});
+ bellUI();setInterval(()=>{try{ui()}catch(e){}},800);
+})();
+</script>
+
+<script>
+/* ===== Changelog: a small menu listing every build and what it added ===== */
+(function(){try{
+ const BUILD=31;
+ const LOG=[
+  [31,['Added this changelog menu so you can see what changed in every build.']],
+  [30,['Chat is now part of the real site (no longer experimental). It works in every room, including for spectators.','Chat notifications: a red badge, a popup with the message, and an optional 🔔 beep, vibration and system notification (off by default).','Reactions on chat messages: 👍 ❤️ 😂 😮 😢.','Photos in chat: shrunk before sending, blurred until tapped, and removed if enough people report them. Two removed photos mutes the sender.','Swear filter and spam limit on chat. People who join late see the last 40 messages.','Hosts of private rooms can switch chat off. The open room has no off switch.']],
+  [29,['Fixed the live camera going black: viewers ask for a fresh connection if the picture is black or frozen, and tapping the video retries.','Videos are now accepted even if a viewer’s screen is a moment behind.','The live player’s camera restarts by itself if it stops or freezes (up to 3 times a turn). The front camera is requested.','Added extra STUN servers and a public relay server so people on blocked school or mobile networks can connect. This also helps with joining rooms.']],
+  [28,['Experimental: 🏫 School disguise. Renames the site and games, changes the tab title and icon, and calms the colours. Three looks. Only changes your own screen.','Experimental: 📲 Add to home screen, with one-tap install where the browser allows it and steps where it doesn’t.','Small arrows now point at the Experiments and Hide buttons when you open the site.']],
+  [27,['Real timers in every game: a countdown bar at the top, and each phase moves on by itself when time runs out.','The open room has no host controls. Games start when everyone has voted, or 25 seconds after the first vote.','If the phone running the open room leaves, another player takes over automatically (the game in progress ends, scores are kept).','🚩 Flag players in the open room. If at least half the players flag someone (minimum 2), they are removed.','Join most games halfway through. Most Likely To and Quick Brain were added to the list of games you can join mid-game.','Doodle Chain and Imposter can’t be joined midway, so late arrivals spectate and join the next game automatically.','Most Likely To, Quick Brain and Imposter now carry on when someone leaves.','“How to play” rules card on the first round of every game, plus a ❓ button. A “How it works” section on the home screen.','Imposter now stops after 4 rounds.']],
+  [26,['📞 Big call on the home screen: one shared video call for up to 8 people, with a live count of who is in it.','Open room counter on the home screen showing how many players are in the open room.']],
+  [25,['🧪 Experimental zone: a place for unfinished features that can’t break the rest of the site. Switches start off, a connection test, an error log, and ?safe=1 to turn it all off.','Chat and reactions were moved into the zone.']],
+  [24,['Removed the first chat and the reaction stickers because they weren’t working.']],
+  [23,['Scores come back if you rejoin within 30 minutes.','Idle phones are kept for 5 minutes instead of 2.','Stone Face: host can skip a player who has vanished.']],
+  [22,['First version of chat: messages, swear filter, and a host switch to turn it off.']],
+  [21,['Reaction stickers: tap 👏 😂 🔥 💀 ❤️ and the emoji floats up everyone’s screen.']],
+  [20,['Open room: everyone votes for the game instead of the host choosing. It starts when everyone has voted.']],
+  [19,['Made the hide button impossible to miss: a notice card, a one-time popup and a clearer button.']],
+  [18,['🫣 Hide button (or press Esc) covers the screen with a fake maths worksheet and changes the tab title.']],
+  [17,['Fixed the host being thrown out when a camera link failed. The host now reconnects by itself after short drops and only calls players who are online.']],
+  [16,['QR scanning fixes: a bigger, simpler QR code, a sharper scanner, a backup scanner library, more forgiving code reading, and clear error messages.']],
+  [15,['🌍 Open room: join with one tap and no code. The first person in starts it. The host can remove players.']],
+  [14,['New game: 🗿 Stone Face. Your camera goes live automatically, the class types or draws silly things onto your screen, and watchers tap “They cracked!” when they see a smile.','Rounds last 15 to 25 seconds and get longer as the game goes on.','Scoring: survive for +3, spotters +1 each (plus +1 for the hit that did it), giving up −1.']],
+  [13,['The original site: Doodle Chain, Most Likely To, Imposter, Quick Brain, Dare Duty, Live Charades and Punishment Roulette.','Private rooms with a 4-letter code or QR code, and cameras that switch on by themselves in the camera games.']]
+ ];
+ const E=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const st=document.createElement('style');
+ st.textContent=`#clb{position:fixed;top:8px;right:8px;z-index:60;padding:3px 10px;font:700 12px/1.4 system-ui,sans-serif;color:#111;background:#fff;border:2px solid #111;border-radius:999px;box-shadow:2px 2px 0 #111;cursor:pointer;opacity:.9}
+ #clp{position:fixed;inset:0;z-index:98;background:rgba(0,0,0,.55);overflow:auto;padding:16px}#clp[hidden]{display:none}
+ #clp .cc{max-width:520px;margin:0 auto;background:#fff;color:#111;border:3px solid #111;border-radius:16px;box-shadow:4px 4px 0 #111;padding:14px;font:15px/1.45 system-ui,sans-serif}
+ #clp h3{margin:12px 0 4px;font:700 17px system-ui,sans-serif}#clp ul{margin:4px 0 8px 18px;padding:0}#clp li{margin:3px 0}
+ #clp details{border-top:2px dashed #ccc;padding:6px 0}#clp summary{cursor:pointer;font-weight:700}
+ #clp .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+ #clp button{font:inherit;font-weight:700;padding:4px 12px;color:#111;background:#fff;border:3px solid #111;border-radius:12px;box-shadow:2px 2px 0 #111;cursor:pointer}
+ #clp .now{background:#cfe9ff;border-radius:8px;padding:2px 8px;font-size:13px;font-weight:700}`;
+ document.head.appendChild(st);
+ const btn=document.createElement('button');btn.id='clb';btn.textContent='📋 Build '+BUILD;btn.title='What’s new';btn.setAttribute('aria-label','Changelog');
+ const pan=document.createElement('div');pan.id='clp';pan.hidden=true;
+ const body=LOG.map((x,i)=>{const items='<ul>'+x[1].map(t=>'<li>'+E(t)+'</li>').join('')+'</ul>',head='Build '+x[0]+(x[0]===BUILD?' <span class=now>you’re here</span>':'');
+  return i<3?`<h3>${head}</h3>${items}`:`<details><summary>${head}</summary>${items}</details>`}).join('');
+ pan.innerHTML=`<div class=cc><div class=top><b style="font-size:18px">📋 What’s new</b><button data-cl="close">Close</button></div><small>Newest build first. Older builds are folded up: tap one to open it.</small>${body}</div>`;
+ document.body.appendChild(btn);document.body.appendChild(pan);
+ const open=()=>{pan.hidden=false;pan.scrollTop=0},close=()=>{pan.hidden=true};
+ btn.addEventListener('click',open);
+ pan.addEventListener('click',e=>{if(e.target===pan||(e.target.dataset&&e.target.dataset.cl==='close'))close()});
+ document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-cl="open"]');if(t)open()});
+ window.CLOG={build:BUILD,log:LOG,open,close};
+}catch(e){}})();
 </script>
 
 <script>
