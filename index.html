@@ -562,7 +562,7 @@ function render(){
  shown=-1;qs=-1;cs=-1;
  const kp=['gs','pi','sft'].map(i=>{const e=$('#'+i);return e?{i,v:e.value,f:document.activeElement===e,k:i==='pi'||i==='sft'||GK===S.t}:null}).filter(Boolean);
  $('#app').innerHTML=(rcn&&S.p.length?'<div class=card style="margin:0 0 8px;padding:8px">Reconnecting…</div>':'')+(!me?vSign():!S.p.length?vHome():S.g?vGame():vLobby());
- $('#after').innerHTML=(S.g?'':BKN)+(me&&!S.p.length?HOMEHOW:'')+'<p class=hm-foot><small><span data-cl="open" style="text-decoration:underline;cursor:pointer">build 32 · What’s new</span></small></p>';
+ $('#after').innerHTML=(S.g?'':BKN)+(me&&!S.p.length?HOMEHOW:'')+'<p class=hm-foot><small><span data-cl="open" style="text-decoration:underline;cursor:pointer">build 33 · What’s new</span></small></p>';
  if($('#qr')&&window.QRCode)new QRCode($('#qr'),{text:location.href.split(/[?#]/)[0]+'?room='+S.c,width:230,height:230,correctLevel:QRCode.CorrectLevel.L});
  if($('#cv'))initCv();
  GK=$('#gs')?S.t:-1;kp.forEach(o=>{const e=$('#'+o.i);if(e&&o.k){if(o.v)e.value=o.v;if(o.f){e.focus();try{e.setSelectionRange(e.value.length,e.value.length)}catch(x){}}}});ppBind();
@@ -1085,8 +1085,10 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
 <script>
 /* ===== Changelog: a small menu listing every build and what it added ===== */
 (function(){try{
- const BUILD=31;
+ const BUILD=33;
  const LOG=[
+  [33,['👥 Friends system (peer to peer, no server): real accounts with a username and password, kept safe with encryption on your device. Add friends by exact username or an invite link, accept or decline requests, and see who is online.','Private messages between friends. Messages to someone offline wait on your phone and send when you are both online. Delivery ticks show waiting, sent and delivered.','Voice and video calls with a friend, with ringing, answer, decline, mute and hang up. Missed calls show up in the chat.','Game invites: invite a friend into your room, or tap Join when a friend is in a room.','Notifications: a badge on the Friends button, a popup for messages, requests, calls and invites, and optional sound, vibration and system alerts.','Safety: only friends can message or call you, there is no search for strangers, and you can remove or block anyone. Each friend gets a safety code so you can check they are who they say.','Account backup code to sign in on another device, plus Keep me signed in.']],
+  [32,['Redesigned the home page and sign-in screen with the same look: a big logo, a bold open-room card with a live player count, a tidy private-room card, a fold-out “How it works”, and the call card moved up so it sits above the help text.']],
   [31,['Added this changelog menu so you can see what changed in every build.']],
   [30,['Chat is now part of the real site (no longer experimental). It works in every room, including for spectators.','Chat notifications: a red badge, a popup with the message, and an optional 🔔 beep, vibration and system notification (off by default).','Reactions on chat messages: 👍 ❤️ 😂 😮 😢.','Photos in chat: shrunk before sending, blurred until tapped, and removed if enough people report them. Two removed photos mutes the sender.','Swear filter and spam limit on chat. People who join late see the last 40 messages.','Hosts of private rooms can switch chat off. The open room has no off switch.']],
   [29,['Fixed the live camera going black: viewers ask for a fresh connection if the picture is black or frozen, and tapping the video retries.','Videos are now accepted even if a viewer’s screen is a moment behind.','The live player’s camera restarts by itself if it stops or freezes (up to 3 times a turn). The front camera is requested.','Added extra STUN servers and a public relay server so people on blocked school or mobile networks can connect. This also helps with joining rooms.']],
@@ -1129,6 +1131,378 @@ window.addEventListener('load',()=>{const c=Q0||R0;if(me&&c&&!peer&&!S.p.length&
  pan.addEventListener('click',e=>{if(e.target===pan||(e.target.dataset&&e.target.dataset.cl==='close'))close()});
  document.addEventListener('click',e=>{const t=e.target.closest&&e.target.closest('[data-cl="open"]');if(t)open()});
  window.CLOG={build:BUILD,log:LOG,open,close};
+}catch(e){}})();
+</script>
+
+<script>
+/* ===== Friends: accounts, friend requests, messages, calls and game invites =====
+   There is no server, so everything is peer to peer:
+   - An account is a username + password on your device. The password protects a private key and your saved
+     friends and messages (all encrypted on this device). The key proves it's really you to your friends.
+   - You're "online" while the site is open and signed in. Messages, calls and invites go straight to your friend's phone.
+   - Messages to someone who's offline wait on your phone and are sent when you both have the site open. */
+(function(){try{
+ if(/[?&]safe=1/.test(location.search))return;
+ const SUB=window.crypto&&crypto.subtle,enc=new TextEncoder(),dec=new TextDecoder();
+ const CFG={throttle:10000,tick:12000,ring:40000};
+ const ID=u=>'hopin-u-'+u,okName=u=>/^[a-z0-9_]{3,16}$/.test(u),uname=s=>String(s||'').trim().toLowerCase().replace(/^@/,'');
+ const sane=(s,n)=>String(s==null?'':s).slice(0,n),same=(a,b)=>!!(a&&b&&a.x===b.x&&a.y===b.y&&a.crv===b.crv);
+ const E=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const $f=s=>document.querySelector(s);
+ const BAD=/\b(f+u+c+k+\w*|sh[i1]+t+\w*|b[i1]tch\w*|cunt\w*|d[i1]ck\w*|a+ss+h[o0]le\w*|bastard\w*|p[i1]ss\w*|sl[u]+t+\w*|wh[o0]re\w*)\b/gi;
+ const lsGet=k=>{try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}},lsSet=(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}},lsDel=k=>{try{localStorage.removeItem(k)}catch(e){}};
+ const accts=()=>lsGet('hopaccts')||[];
+ const b64=buf=>{let s='';const a=new Uint8Array(buf);for(let i=0;i<a.length;i++)s+=String.fromCharCode(a[i]);return btoa(s)},unb64=t=>{const s=atob(t),a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i);return a.buffer};
+ const rnd=()=>b64(crypto.getRandomValues(new Uint8Array(12))).replace(/[^A-Za-z0-9]/g,'x');
+ // ---- crypto ----
+ const deriveK=async(pw,salt,ex)=>{const km=await SUB.importKey('raw',enc.encode(pw),'PBKDF2',false,['deriveKey']);return SUB.deriveKey({name:'PBKDF2',salt:new Uint8Array(salt),iterations:120000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},!!ex,['encrypt','decrypt'])};
+ const seal=async(K,obj)=>{const iv=crypto.getRandomValues(new Uint8Array(12)),ct=await SUB.encrypt({name:'AES-GCM',iv},K,enc.encode(JSON.stringify(obj)));return{iv:b64(iv),ct:b64(ct)}};
+ const unseal=async(K,box)=>JSON.parse(dec.decode(await SUB.decrypt({name:'AES-GCM',iv:new Uint8Array(unb64(box.iv))},K,unb64(box.ct))));
+ const signT=async(k,t)=>b64(await SUB.sign({name:'ECDSA',hash:'SHA-256'},k,enc.encode(t)));
+ const verifyT=async(pub,t,sig)=>{const k=await SUB.importKey('jwk',pub,{name:'ECDSA',namedCurve:'P-256'},false,['verify']);return SUB.verify({name:'ECDSA',hash:'SHA-256'},k,unb64(sig),enc.encode(t))};
+ const fpOf=async pub=>[...new Uint8Array(await SUB.digest('SHA-256',enc.encode(pub.x+'.'+pub.y)))].slice(0,6).map(x=>x.toString(16).padStart(2,'0')).join('').match(/.{4}/g).join(' ');
+ // ---- state ----
+ let ACC=null,D=null,P=null,LIVE={},LAST={},RL={},VIEW='auth',AUTHTAB='in',CHATU='',MORE='',INV=[],CALL=null,OPEN=false,SAVET=0,TICKT=0,PRET=0,PRESIG='',TOASTT=0,RRP=0,ADD=null,actx=null;
+ const profile=()=>({n:sane((typeof me!=='undefined'&&me&&me.n)||(ACC&&ACC.u)||'Guest',12),e:sane((typeof me!=='undefined'&&me&&me.e)||'🙂',8)});
+ const newData=()=>({friends:{},blocked:{},inReq:[],outReq:[],pendAcc:{},msgs:{},outbox:{},unread:{},set:{room:1,bell:0}});
+ const fixD=d=>{const n=newData();Object.keys(n).forEach(k=>{if(d[k]==null)d[k]=n[k]});d.set=Object.assign({room:1,bell:0},d.set);return d};
+ const thread=u=>D.msgs[u]||(D.msgs[u]=[]);
+ const inRoom=()=>typeof S!=='undefined'&&S&&S.p&&S.p.length>0;
+ // ---- styles + shell ----
+ const st=document.createElement('style');
+ st.textContent=`#fr button,#fr input,#fr textarea{font:inherit}
+ #fr [hidden]{display:none!important}
+ #fpill{position:fixed;top:8px;left:8px;z-index:61;padding:3px 10px;font:700 12px/1.4 system-ui,sans-serif;color:#111;background:#fff;border:2px solid #111;border-radius:999px;box-shadow:2px 2px 0 #111;cursor:pointer}
+ #fpill b{display:inline-block;background:#ff4d8d;color:#fff;border-radius:9px;padding:0 6px;margin-left:5px;font-size:11px}#fpill b:empty{display:none}
+ #fp{position:fixed;inset:0;z-index:97;background:rgba(0,0,0,.55)}
+ #fp .sh{position:absolute;left:0;right:0;bottom:0;max-height:90vh;height:90vh;background:#fff;color:#111;border-top:3px solid #111;border-radius:18px 18px 0 0;display:flex;flex-direction:column;font:15px/1.4 system-ui,sans-serif;max-width:560px;margin:0 auto}
+ #fp .th{display:flex;align-items:center;gap:8px;padding:10px 12px;border-bottom:2px solid #111}#fp .th b{flex:1;font-size:17px}
+ #fp .bd{overflow:auto;padding:12px;flex:1;display:flex;flex-direction:column;gap:10px}
+ #fr button{color:#111;background:#fff;border:2px solid #111;border-radius:10px;padding:5px 10px;font-weight:700;cursor:pointer;box-shadow:2px 2px 0 #111;width:auto;display:inline-block;margin:0}
+ #fr button.r{background:#ff8fb3}#fr button.on{background:#cfe9ff}#fr button.red{background:#ff6b6b;color:#fff}#fr button[disabled]{opacity:.4;box-shadow:none}
+ #fr input,#fr textarea{width:100%;box-sizing:border-box;border:2px solid #111;border-radius:10px;padding:9px;background:#fff;color:#111;margin:0}
+ #fr textarea{min-height:60px}
+ #fp .fr{border:2px solid #111;border-radius:12px;padding:8px 10px;display:flex;flex-direction:column;gap:6px}
+ #fp .fr .top{display:flex;align-items:center;gap:8px;flex-wrap:wrap}#fp .fr .acts{display:flex;gap:6px;flex-wrap:wrap}
+ #fp .dot{width:10px;height:10px;border-radius:50%;background:#bbb;display:inline-block}#fp .dot.on{background:#18c964}
+ #fp .lab{font-weight:800;font-size:13px;opacity:.7;margin-top:4px}
+ #fp .row{display:flex;gap:8px}#fp .row input{flex:1;min-width:0}
+ #fml{flex:1;overflow:auto;min-height:140px;display:flex;flex-direction:column;gap:6px}
+ .mb{max-width:80%;padding:6px 10px;border:2px solid #111;border-radius:12px;word-break:break-word;align-self:flex-start;background:#fff}.mb.me{align-self:flex-end;background:#cfe9ff}.mb.sys{align-self:center;background:#f3f3f3;font-size:13px;border-style:dashed}
+ .mb small{display:block;opacity:.6;font-size:11px}
+ #fnt{position:fixed;top:10px;left:12px;right:12px;z-index:96;background:#151515;color:#fff;border-radius:12px;padding:10px 14px;font:700 14px/1.3 system-ui,sans-serif;cursor:pointer;max-width:520px;margin:0 auto;box-shadow:0 4px 14px rgba(0,0,0,.3)}
+ #fcl{position:fixed;inset:0;z-index:99;background:#111;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;font:16px system-ui,sans-serif;text-align:center;padding:16px}
+ #frv{width:100%;max-width:560px;max-height:60vh;background:#000;border-radius:12px}#fsv{position:absolute;right:12px;top:12px;width:96px;border:2px solid #fff;border-radius:8px;background:#000;transform:scaleX(-1)}
+ #fcl .big{font-size:56px}`;
+ document.head.appendChild(st);
+ const root=document.createElement('div');root.id='fr';
+ root.innerHTML=`<button id=fpill data-f=open aria-label="Friends">👥 Friends<b id=fbadge></b></button><div id=fnt hidden></div>
+ <div id=fp hidden><div class=sh><div class=th><b id=fttl>👥 Friends</b><span id=ftabs></span><button data-f=close>✕</button></div><div class=bd id=fbd></div></div></div>
+ <div id=fcl hidden><video id=frv autoplay playsinline hidden></video><video id=fsv autoplay playsinline muted hidden></video><div id=fct></div></div>`;
+ document.body.appendChild(root);
+
+ // ---- storage ----
+ const flush=()=>{clearTimeout(SAVET);SAVET=0;if(!(ACC&&D))return Promise.resolve();const u=ACC.u;return seal(ACC.K,D).then(b=>lsSet('hopdata:'+u,b)).catch(()=>{})};
+ const saveSoon=()=>{clearTimeout(SAVET);SAVET=setTimeout(flush,250)};
+ // ---- network ----
+ function startNet(u,tries){
+  return new Promise(res=>{
+   if(!window.Peer){res('err');return}
+   let n=0;const go=()=>{const p=new Peer(ID(u),typeof PCFG!=='undefined'?PCFG:undefined);let done=0;const fin=r=>{if(!done){done=1;res(r)}};
+    p.on('open',()=>{P=p;fin('ok')});
+    p.on('error',e=>{
+     if(e.type==='unavailable-id'){try{p.destroy()}catch(x){}if(!done){if(++n<=(tries||0)){done=1;setTimeout(go,1500)}else fin('taken')}else if(P===p||!P){logout('You were signed out because this account was opened somewhere else.')}}
+     else if(e.type==='peer-unavailable'){}
+     else if(!done)fin('err')});
+    p.on('connection',c=>wire(c,false));p.on('call',onMedia);p.on('disconnected',()=>{try{p.reconnect()}catch(x){}})};
+   go()})}
+ function connectFriend(u,force){
+  if(!P||!ACC||!okName(u)||D.blocked[u])return;const lv=LIVE[u];if(lv&&lv.c&&lv.c.open)return;
+  const now=Date.now();if(!force&&now-(LAST[u]||0)<CFG.throttle)return;LAST[u]=now;
+  try{const c=P.connect(ID(u),{reliable:true});wire(c,true,u)}catch(e){}}
+ function wire(c,init,want){
+  const X={c,init,want,ok:0,u:null,nonce:rnd()};
+  c.on('open',()=>{if(!init){c.send({t:'ch',n:X.nonce});X.tm=setTimeout(()=>{if(X.ok!==1){try{c.close()}catch(e){}}},20000)}});
+  c.on('data',m=>{onData(X,m).catch(()=>{})});
+  c.on('close',()=>{clearTimeout(X.tm);if(X.u&&LIVE[X.u]&&LIVE[X.u].c===c){delete LIVE[X.u];if(CALL&&CALL.u===X.u)endCall(false,'dropped');refresh()}});
+  c.on('error',()=>{})}
+ const sendTo=(u,m)=>{const l=LIVE[u];if(l&&l.c&&l.c.open){try{l.c.send(m);return true}catch(e){}}return false};
+ function warnImpostor(u){toast('⚠️ Someone pretending to be @'+u+' tried to connect. They were blocked.')}
+ async function onData(X,m){
+  if(!ACC||!m||typeof m!=='object')return;const t=m.t;
+  if(!X.init){
+   if(t==='au'&&!X.u){const u=uname(m.u),pub=m.pub;if(!okName(u)||u===ACC.u||D.blocked[u]||!pub||!pub.x||!pub.y){try{X.c.close()}catch(e){}return}
+    const fr=D.friends[u];if(fr&&!same(fr.pub,pub)){warnImpostor(u);try{X.c.send({t:'bad'})}catch(e){}setTimeout(()=>{try{X.c.close()}catch(e){}},60);return}
+    let ok=false;try{ok=await verifyT(pub,'A|'+X.nonce+'|'+u+'|'+ACC.u,m.sig)}catch(e){}
+    if(!ok){try{X.c.close()}catch(e){}return}
+    X.u=u;X.pub=pub;X.ok=fr?1:2;X.c.send({t:'au2',pub:ACC.pub,sig:await signT(ACC.sk,'B|'+sane(m.cn,40)+'|'+ACC.u+'|'+u)});
+    if(X.ok===1)live(X);return}
+  }else{
+   if(t==='ch'&&!X.sent){X.sent=1;X.c.send({t:'au',u:ACC.u,pub:ACC.pub,cn:X.nonce,sig:await signT(ACC.sk,'A|'+sane(m.n,40)+'|'+ACC.u+'|'+X.want)});return}
+   if(t==='au2'&&!X.ok){const fr=D.friends[X.want],pub=m.pub||{};if(!pub.x||!pub.y||(fr&&!same(fr.pub,pub))){if(fr)warnImpostor(X.want);try{X.c.close()}catch(e){}return}
+    let ok=false;try{ok=await verifyT(pub,'B|'+X.nonce+'|'+X.want+'|'+ACC.u,m.sig)}catch(e){}
+    if(!ok){try{X.c.close()}catch(e){}return}
+    X.u=X.want;X.pub=pub;X.ok=fr?1:2;if(X.ok===1)live(X);else if(D.outReq.some(r=>r.u===X.u)){const p=profile();X.c.send({t:'fr',n:p.n,e:p.e})}return}
+   if(t==='bad'){try{X.c.close()}catch(e){}return}}
+  if(!X.ok)return;const u=X.u;
+  if(t==='fr'){
+   if(D.blocked[u])return;const n=sane(m.n,12)||u,e=sane(m.e,8)||'🙂';
+   if(D.friends[u]){sendTo(u,{t:'fa',n:profile().n,e:profile().e});return}
+   const out=D.outReq.find(r=>r.u===u);
+   if(out){befriend(u,X.pub,n,e);D.outReq=D.outReq.filter(r=>r.u!==u);X.ok=1;live(X);try{X.c.send({t:'fa',n:profile().n,e:profile().e})}catch(x){}note('👥 Friends!','You and '+n+' (@'+u+') are now friends.',()=>openPanel('friends'))}
+   else if(!D.inReq.some(r=>r.u===u)&&D.inReq.length<20){D.inReq.push({u,n,e,pub:X.pub,ts:Date.now()});note('👥 Friend request',n+' (@'+u+') wants to be friends.',()=>openPanel('friends'))}
+   saveSoon();refresh();return}
+  if(t==='fa'){const out=D.outReq.find(r=>r.u===u);if(!out&&!D.friends[u])return;
+   if(!D.friends[u])befriend(u,X.pub,sane(m.n,12)||u,sane(m.e,8)||'🙂');D.outReq=D.outReq.filter(r=>r.u!==u);X.ok=1;live(X);
+   note('👥 Request accepted','@'+u+' accepted your friend request.',()=>openPanel('friends'));saveSoon();refresh();return}
+  if(X.ok!==1)return;
+  if(t==='dm'){const x=sane(m.x,500),id=sane(m.id,24);if(!x||!id)return;
+   const now=Date.now();RL[u]=(RL[u]||[]).filter(z=>now-z<3000);if(RL[u].length>=6)return;RL[u].push(now);
+   const th=thread(u);if(th.some(z=>z.id===id)){sendTo(u,{t:'ak',id});return}
+   th.push({id,me:0,x,ts:now,st:2});if(th.length>200)th.splice(0,th.length-200);sendTo(u,{t:'ak',id});
+   const seen=OPEN&&VIEW==='chat'&&CHATU===u&&!document.hidden;if(!seen){D.unread[u]=(D.unread[u]||0)+1;const f=D.friends[u];note('💬 '+f.n,x.slice(0,80),()=>{openPanel('chat',u)})}
+   saveSoon();refresh();return}
+  if(t==='ak'){const id=sane(m.id,24),z=thread(u).find(q=>q.id===id);if(z)z.st=2;D.outbox[u]=(D.outbox[u]||[]).filter(q=>q.id!==id);saveSoon();refresh();return}
+  if(t==='pr'){const l=LIVE[u];if(l){l.pr={room:sane(m.room,4),game:sane(m.game,3),n:sane(m.n,12),e:sane(m.e,8)};if(D.friends[u]){D.friends[u].n=l.pr.n||D.friends[u].n;D.friends[u].e=l.pr.e||D.friends[u].e}refresh()}return}
+  if(t==='inv'){const room=sane(m.room,4).toUpperCase();if(!/^[A-Z]{4}$/.test(room))return;INV=INV.filter(i=>i.u!==u);INV.push({u,room,game:sane(m.game,3),ts:Date.now()});const f=D.friends[u];note('🎮 Game invite',f.n+' invited you to '+gname(m.game)+'.',()=>openPanel('friends'));refresh();return}
+  if(t==='cs'){onCS(u,m.mode==='video'?'video':'voice');return}
+  if(t==='ca'){onCA(u);return}
+  if(t==='cd'){if(CALL&&CALL.u===u&&CALL.st==='ring'&&CALL.dir==='out')endCall(false,m.why==='busy'?'busy':'declined');return}
+  if(t==='cx'){if(CALL&&CALL.u===u&&CALL.dir==='in'&&CALL.st==='ring')endCall(false,'missed');return}
+  if(t==='ce'){if(CALL&&CALL.u===u)endCall(false,'ended');return}
+  if(t==='rm'){const f=D.friends[u];if(f){delete D.friends[u];delete D.msgs[u];delete D.outbox[u];delete D.unread[u];toast('@'+u+' removed you from their friends.');saveSoon();refresh()}}}
+ const gname=g=>{try{const x=GM.find(z=>z[0]===g);return x?x[1]+' '+x[2]:'a game'}catch(e){return'a game'}};
+ function befriend(u,pub,n,e){D.friends[u]={n,e,pub,since:Date.now(),fp:''};fpOf(pub).then(f=>{if(D.friends[u]){D.friends[u].fp=f;saveSoon()}}).catch(()=>{})}
+ function live(X){
+  const u=X.u,old=LIVE[u];if(old&&old.c!==X.c){try{old.c.close()}catch(e){}}
+  LIVE[u]={c:X.c,pr:(old&&old.pr)||null};sendPresence(u);flushOut(u);
+  if(D.pendAcc[u]){sendTo(u,{t:'fa',n:profile().n,e:profile().e});delete D.pendAcc[u];saveSoon()}
+  refresh()}
+ const myPresence=()=>{const p=profile(),r=D.set.room&&inRoom()?{room:S.c||'',game:S.g||''}:{room:'',game:''};return Object.assign({t:'pr',n:p.n,e:p.e},r)};
+ const sendPresence=u=>sendTo(u,myPresence());
+ const broadcastPresence=()=>Object.keys(LIVE).forEach(sendPresence);
+ function flushOut(u){(D.outbox[u]||[]).forEach(o=>{if(sendTo(u,{t:'dm',id:o.id,x:o.x,ts:o.ts})){const z=thread(u).find(q=>q.id===o.id);if(z&&z.st===0)z.st=1}})}
+ // ---- accounts ----
+ async function openSession(u,K,priv,pub,data,keep){
+  const sk=await SUB.importKey('jwk',priv,{name:'ECDSA',namedCurve:'P-256'},false,['sign']);
+  ACC={u,sk,pub,K};D=fixD(data);
+  if(keep){try{lsSet('hopkeep',{u,k:b64(await SUB.exportKey('raw',K))})}catch(e){}}else lsDel('hopkeep');
+  startTimers();VIEW='friends';if(ADD){}refreshAll();tick();broadcastPresence()}
+ async function createAcct(u,pw,pw2,keep){
+  if(!SUB)throw new Error('Accounts need a secure (https) page.');
+  if(!okName(u))throw new Error('Usernames are 3 to 16 letters, numbers or underscores.');
+  if(pw.length<6)throw new Error('Use a password with at least 6 characters.');
+  if(pw!==pw2)throw new Error('The two passwords don’t match.');
+  if(accts().includes(u))throw new Error('That username already exists on this device. Log in instead.');
+  const salt=crypto.getRandomValues(new Uint8Array(16)),K=await deriveK(pw,salt,keep);
+  const kp=await SUB.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']),priv=await SUB.exportKey('jwk',kp.privateKey),pj=await SUB.exportKey('jwk',kp.publicKey),pub={kty:pj.kty,crv:pj.crv,x:pj.x,y:pj.y};
+  const r=await startNet(u,0);if(r==='taken')throw new Error('That username is in use right now. Pick another one.');if(r!=='ok')throw new Error('Couldn’t reach the friends network. Check your connection.');
+  const rec={salt:b64(salt),pub,key:await seal(K,priv),ts:Date.now()},d0=newData();
+  lsSet('hopacct:'+u,rec);lsSet('hopaccts',accts().concat(u));lsSet('hopdata:'+u,await seal(K,d0));
+  await openSession(u,K,priv,pub,d0,keep)}
+ async function loginWith(u,K,keep,silent){
+  const rec=lsGet('hopacct:'+u);if(!rec)throw new Error('No account called @'+u+' on this device. Create it, or import a backup.');
+  let priv;try{priv=await unseal(K,rec.key)}catch(e){throw new Error('Wrong password.')}
+  const box=lsGet('hopdata:'+u);let data=null;if(box){try{data=await unseal(K,box)}catch(e){}}if(!data)data=newData();
+  const r=await startNet(u,silent?4:2);if(r==='taken')throw new Error('@'+u+' is already signed in on another device or tab.');if(r!=='ok')throw new Error('Couldn’t reach the friends network. Check your connection.');
+  await openSession(u,K,priv,rec.pub,data,keep)}
+ async function loginAcct(u,pw,keep){
+  if(!SUB)throw new Error('Accounts need a secure (https) page.');const rec=lsGet('hopacct:'+u);if(!rec)throw new Error('No account called @'+u+' on this device. Create it, or import a backup.');
+  await loginWith(u,await deriveK(pw,unb64(rec.salt),keep),keep,false)}
+ async function autoLogin(){
+  const k=lsGet('hopkeep');if(!k||!SUB||!lsGet('hopacct:'+k.u))return;
+  try{const K=await SUB.importKey('raw',unb64(k.k),'AES-GCM',true,['encrypt','decrypt']);await loginWith(k.u,K,true,true)}catch(e){}}
+ function logout(msg){
+  if(CALL)endCall(true,'ended');flush();Object.keys(LIVE).forEach(u=>{try{LIVE[u].c.close()}catch(e){}});LIVE={};
+  try{P&&P.destroy()}catch(e){}P=null;ACC=null;D=null;lsDel('hopkeep');stopTimers();INV=[];VIEW='auth';CHATU='';refreshAll();if(msg)setErr(msg)}
+ function exportAcct(){const u=ACC.u;return btoa(unescape(encodeURIComponent(JSON.stringify({v:1,u,rec:lsGet('hopacct:'+u),data:lsGet('hopdata:'+u)}))))}
+ function importAcct(code){
+  let o;try{o=JSON.parse(decodeURIComponent(escape(atob(String(code).trim()))))}catch(e){throw new Error('That backup code isn’t valid.')}
+  if(!o||o.v!==1||!okName(o.u)||!o.rec||!o.rec.key||!o.rec.salt)throw new Error('That backup code isn’t valid.');
+  if(accts().includes(o.u))throw new Error('@'+o.u+' is already on this device. Log in instead.');
+  lsSet('hopacct:'+o.u,o.rec);if(o.data)lsSet('hopdata:'+o.u,o.data);lsSet('hopaccts',accts().concat(o.u));return o.u}
+ function deleteAcct(){const u=ACC.u;Object.keys(LIVE).forEach(f=>sendTo(f,{t:'rm'}));lsDel('hopacct:'+u);lsDel('hopdata:'+u);lsSet('hopaccts',accts().filter(x=>x!==u));D=null;logout('Account deleted from this device.')}
+ // ---- friend actions ----
+ function requestFriend(raw){
+  const u=uname(raw);if(!okName(u))throw new Error('Usernames are 3 to 16 letters, numbers or underscores.');
+  if(u===ACC.u)throw new Error('That’s you!');if(D.friends[u])throw new Error('@'+u+' is already your friend.');
+  if(D.blocked[u])throw new Error('You blocked @'+u+'. Unblock them first.');
+  const inc=D.inReq.find(r=>r.u===u);if(inc){acceptReq(u);return'accepted'}
+  if(D.outReq.some(r=>r.u===u))throw new Error('You already sent @'+u+' a request.');
+  D.outReq.push({u,ts:Date.now()});saveSoon();connectFriend(u,true);refresh();return'sent'}
+ function acceptReq(u){
+  const r=D.inReq.find(q=>q.u===u);if(!r)return;befriend(u,r.pub,r.n,r.e);D.inReq=D.inReq.filter(q=>q.u!==u);D.outReq=D.outReq.filter(q=>q.u!==u);
+  if(!sendTo(u,{t:'fa',n:profile().n,e:profile().e})){D.pendAcc[u]=1;connectFriend(u,true)}saveSoon();refresh()}
+ const declineReq=u=>{D.inReq=D.inReq.filter(q=>q.u!==u);saveSoon();refresh()};
+ const cancelReq=u=>{D.outReq=D.outReq.filter(q=>q.u!==u);saveSoon();refresh()};
+ function removeFriend(u){sendTo(u,{t:'rm'});delete D.friends[u];delete D.msgs[u];delete D.outbox[u];delete D.unread[u];const l=LIVE[u];if(l){try{l.c.close()}catch(e){}delete LIVE[u]}saveSoon();refresh()}
+ function blockUser(u){removeFriend(u);D.blocked[u]=1;D.inReq=D.inReq.filter(q=>q.u!==u);D.outReq=D.outReq.filter(q=>q.u!==u);saveSoon();refresh()}
+ function sendDM(u,raw){
+  const x=sane(raw,500).trim().replace(BAD,'***');if(!x||!D.friends[u])return false;const id=rnd(),ts=Date.now();
+  thread(u).push({id,me:1,x,ts,st:0});if(thread(u).length>200)thread(u).splice(0,thread(u).length-200);
+  (D.outbox[u]=D.outbox[u]||[]).push({id,x,ts});
+  if(sendTo(u,{t:'dm',id,x,ts}))thread(u).find(q=>q.id===id).st=1;else connectFriend(u,true);
+  saveSoon();refresh();return true}
+ function inviteFriend(u){if(!inRoom()){throw new Error('Join a room first, then invite your friends to it.')}if(!sendTo(u,{t:'inv',room:S.c,game:S.g||''}))throw new Error('@'+u+' isn’t online right now.');return true}
+ function joinRoom(code){
+  if(!window.Peer){throw new Error('Still loading. Try again in a second.')}
+  closePanel();if(inRoom()){try{fail('')}catch(e){}}
+  if(code==='OPEN'){try{A.open()}catch(e){}}else{try{join(code);render()}catch(e){}}}
+ // ---- calls ----
+ async function media(mode){return navigator.mediaDevices.getUserMedia({audio:true,video:mode==='video'?{facingMode:'user',width:{ideal:480},height:{ideal:360}}:false})}
+ const busy=()=>!!(window.CALLDBG&&CALLDBG.state().inCall);
+ async function startCall(u,mode){
+  if(CALL)throw new Error('You’re already in a call.');if(busy())throw new Error('Leave the Big call first.');if(!LIVE[u])throw new Error('@'+u+' isn’t online right now.');
+  let s;try{s=await media(mode)}catch(e){throw new Error('Allow the microphone'+(mode==='video'?' and camera':'')+' to call.')}
+  CALL={u,mode,dir:'out',st:'ring',stream:s};if(!sendTo(u,{t:'cs',mode})){endCall(false,'dropped');throw new Error('Couldn’t reach @'+u+'.')}
+  CALL.tm=setTimeout(()=>{if(CALL&&CALL.st==='ring')endCall(true,'noanswer')},CFG.ring);callUI()}
+ function onCS(u,mode){
+  if(CALL||busy()){sendTo(u,{t:'cd',why:'busy'});return}
+  CALL={u,mode,dir:'in',st:'ring'};CALL.tm=setTimeout(()=>{if(CALL&&CALL.st==='ring')endCall(false,'missed')},CFG.ring);
+  note((mode==='video'?'📹':'📞')+' Incoming call',D.friends[u].n+' is calling you.',()=>openPanel('friends'));callUI()}
+ async function acceptCall(mode){
+  if(!CALL||CALL.dir!=='in'||CALL.st!=='ring')return;let s;try{s=await media(mode)}catch(e){toast('Allow the microphone'+(mode==='video'?' and camera':'')+' to answer.');return}
+  clearTimeout(CALL.tm);CALL.stream=s;CALL.mode=mode;CALL.st='wait';sendTo(CALL.u,{t:'ca',mode});CALL.tm=setTimeout(()=>{if(CALL&&CALL.st==='wait')endCall(true,'failed')},20000);callUI()}
+ function onCA(u){
+  if(!CALL||CALL.dir!=='out'||CALL.u!==u||CALL.st!=='ring')return;clearTimeout(CALL.tm);CALL.st='conn';
+  try{const c=P.call(ID(u),CALL.stream);CALL.call=c;c.on('stream',rs=>gotStream(rs));c.on('close',()=>{if(CALL&&CALL.call===c)endCall(false,'ended')});c.on('error',()=>{if(CALL&&CALL.call===c)endCall(false,'failed')})}catch(e){endCall(true,'failed')}
+  CALL.tm=setTimeout(()=>{if(CALL&&CALL.st==='conn')endCall(true,'failed')},20000);callUI()}
+ function onMedia(c){
+  if(CALL&&CALL.dir==='in'&&CALL.st==='wait'&&c.peer===ID(CALL.u)){CALL.call=c;c.answer(CALL.stream);c.on('stream',rs=>gotStream(rs));c.on('close',()=>{if(CALL&&CALL.call===c)endCall(false,'ended')})}else{try{c.close()}catch(e){}}}
+ function gotStream(rs){if(!CALL)return;clearTimeout(CALL.tm);CALL.st='live';CALL.t0=CALL.t0||Date.now();CALL.remote=rs;callUI()}
+ function endCall(send,why){
+  const c=CALL;if(!c)return;CALL=null;clearTimeout(c.tm);
+  if(send){const code=c.st==='ring'&&c.dir==='out'?'cx':c.st==='ring'&&c.dir==='in'?'cd':'ce';sendTo(c.u,code==='cd'?{t:'cd',why:'declined'}:{t:code})}
+  try{c.call&&c.call.close()}catch(e){}try{c.stream&&c.stream.getTracks().forEach(t=>t.stop())}catch(e){}
+  if(D&&D.friends[c.u]){const secs=c.t0?Math.round((Date.now()-c.t0)/1000):0,txt={ended:'📞 Call ended ('+Math.floor(secs/60)+':'+String(secs%60).padStart(2,'0')+')',missed:'📞 Missed call',declined:'📞 Call declined',busy:'📞 They were busy',noanswer:'📞 No answer',failed:'📞 Call couldn’t connect',dropped:'📞 Call dropped'}[why]||'📞 Call ended';
+   thread(c.u).push({id:rnd(),sys:1,x:txt,ts:Date.now()});saveSoon();if(why==='missed'){D.unread[c.u]=(D.unread[c.u]||0)+1}}
+  callUI();refresh()}
+ function callUI(){
+  const o=$f('#fcl'),ct=$f('#fct'),rv=$f('#frv'),sv=$f('#fsv');if(!o)return;
+  if(!CALL){o.hidden=true;rv.srcObject=null;sv.srcObject=null;return}
+  o.hidden=false;const f=D&&D.friends[CALL.u]||{n:CALL.u,e:'🙂'},vid=CALL.mode==='video';
+  let h='';
+  if(CALL.st==='ring'&&CALL.dir==='in')h=`<div class=big>${E(f.e)}</div><b>${E(f.n)}</b> is calling…<small>${vid?'Video call':'Voice call'}</small><div><button class=r data-f=cacc data-m=voice>🎤 Answer</button> <button class=r data-f=cacc data-m=video>📹 Answer with video</button> <button class=red data-f=chang>Decline</button></div>`;
+  else if(CALL.st==='ring')h=`<div class=big>${E(f.e)}</div>Calling <b>${E(f.n)}</b>…<div><button class=red data-f=chang>Cancel</button></div>`;
+  else if(CALL.st==='live')h=`<b>${E(f.e)} ${E(f.n)}</b><div><button data-f=cmute id=fmute>🎤 Mute</button> ${CALL.mode==='video'?'<button data-f=ccam>📹 Camera off</button> ':''}<button class=red data-f=chang>Hang up</button></div>`;
+  else h=`<div class=big>${E(f.e)}</div>Connecting to <b>${E(f.n)}</b>…<div><button class=red data-f=chang>Cancel</button></div>`;
+  ct.innerHTML=h;
+  const live=CALL.st==='live';rv.hidden=!(live);if(live&&rv.srcObject!==CALL.remote){rv.srcObject=CALL.remote;try{rv.play()}catch(e){}}
+  const showSelf=live&&CALL.mode==='video'&&CALL.stream;sv.hidden=!showSelf;if(showSelf&&sv.srcObject!==CALL.stream)sv.srcObject=CALL.stream}
+ // ---- notifications ----
+ function beep(){try{if(!actx)actx=new(window.AudioContext||window.webkitAudioContext)();const o=actx.createOscillator(),g=actx.createGain();o.frequency.value=660;g.gain.value=.08;o.connect(g);g.connect(actx.destination);o.start();o.stop(actx.currentTime+.15)}catch(e){}}
+ function toast(msg,act){const t=$f('#fnt');t.textContent=msg;t.hidden=false;t._a=act||null;clearTimeout(TOASTT);TOASTT=setTimeout(()=>{t.hidden=true},5000)}
+ function note(title,body,act){
+  setBadge();if(!(OPEN&&!document.hidden))toast(title+': '+body,act);
+  if(D&&D.set.bell){beep();try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}try{if(document.hidden&&window.Notification&&Notification.permission==='granted')new Notification(title,{body,tag:'hopfriends'})}catch(e){}}}
+ const total=()=>D?Object.values(D.unread).reduce((a,b)=>a+b,0)+D.inReq.length+INV.filter(i=>Date.now()-i.ts<600000).length:0;
+ function setBadge(){const b=$f('#fbadge');if(b){const n=total();b.textContent=n?(n>9?'9+':String(n)):''}}
+ // ---- screens ----
+ const status=u=>{const l=LIVE[u],p=l&&l.pr;if(!l)return'Offline';if(!p||!p.room)return'Online';return p.room==='OPEN'?'In the open room':'In room '+p.room};
+ function tabs(){const t=$f('#ftabs');if(!t)return;t.innerHTML=ACC&&VIEW!=='auth'?`<button data-f=view data-v=friends class="${VIEW==='friends'||VIEW==='chat'?'on':''}">Friends</button> <button data-f=view data-v=acct class="${VIEW==='acct'?'on':''}">Account</button>`:'';$f('#fttl').textContent=VIEW==='chat'?'💬 Chat':'👥 Friends'}
+ function authHTML(){
+  const nw=AUTHTAB==='new',ac=accts();
+  return `<div class=row><button data-f=authtab data-t=in class="${nw?'':'on'}">Log in</button><button data-f=authtab data-t=new class="${nw?'on':''}">Create account</button></div>
+  ${!nw&&ac.length?`<div class=lab>Accounts on this device</div><div>${ac.map(u=>`<button data-f=pick data-u="${u}">@${u}</button>`).join(' ')}</div>`:''}
+  <input id=fau placeholder="username" autocapitalize=none autocomplete=username maxlength=16 value="${E(ADD&&ADD.pick||'')}">
+  <input id=fap type=password placeholder="password" autocomplete="${nw?'new-password':'current-password'}">
+  ${nw?'<input id=fap2 type=password placeholder="repeat password" autocomplete=new-password>':''}
+  <label><input type=checkbox id=fkeep checked style="width:auto"> Keep me signed in on this device</label>
+  <button class=r data-f="${nw?'create':'login'}">${nw?'Create account':'Log in'}</button><small id=ferr></small>
+  <details><summary>Import an account from another device</summary><textarea id=fimp placeholder="Paste your backup code here"></textarea><button data-f=import>Import</button></details>
+  <small>Your account lives on your devices. The password locks your friends and messages. Friends can only find you by your exact username. There’s no way to reset a forgotten password, so make a backup in the Account tab.</small>`}
+ function friendsHTML(){return `<div class=row><input id=fadd placeholder="Add a friend by username" autocapitalize=none maxlength=17><button class=r data-f=addf>Add</button></div><small id=ferr></small>
+  <div class=row style="align-items:center"><small>You are <b>@${ACC.u}</b></small><button data-f=link>🔗 Copy my invite link</button></div><div id=finv></div><div id=flist></div>`}
+ function listHTML(){
+  let h='';const now=Date.now();
+  const rq=D.inReq.map(r=>`<div class=fr><div class=top><b>${E(r.e)} ${E(r.n)}</b><small>@${r.u} wants to be friends</small></div><div class=acts><button class=r data-f=acc data-u="${r.u}">Accept</button><button data-f=dec data-u="${r.u}">Decline</button></div></div>`).join('');
+  if(rq)h+=`<div class=lab>Friend requests</div>${rq}`;
+  if(D.outReq.length)h+=`<div class=lab>Waiting for an answer</div>`+D.outReq.map(r=>`<div class=fr><div class=top><b>@${r.u}</b><small>Request sent. They need the site open to get it.</small><button data-f=cnl data-u="${r.u}">Cancel</button></div></div>`).join('');
+  const fs=Object.keys(D.friends).sort((a,b)=>(LIVE[b]?1:0)-(LIVE[a]?1:0)||D.friends[a].n.localeCompare(D.friends[b].n));
+  h+=`<div class=lab>Friends (${fs.length})</div>`;
+  if(!fs.length)h+='<small>No friends yet. Add someone by their exact username, or share your invite link.</small>';
+  h+=fs.map(u=>{const f=D.friends[u],on=!!LIVE[u],pr=LIVE[u]&&LIVE[u].pr,un=D.unread[u]||0;
+   return `<div class=fr><div class=top><span class="dot ${on?'on':''}"></span><b>${E(f.e)} ${E(f.n)}</b><small>@${u}</small><small>· ${E(status(u))}</small></div>
+   <div class=acts><button data-f=chat data-u="${u}">💬${un?` <b style="color:#ff4d8d">${un}</b>`:''}</button><button data-f=call data-u="${u}" data-m=voice ${on?'':'disabled'} aria-label="Voice call">📞</button><button data-f=call data-u="${u}" data-m=video ${on?'':'disabled'} aria-label="Video call">📹</button>
+   ${inRoom()?`<button data-f=invite data-u="${u}" ${on?'':'disabled'}>🎮 Invite</button>`:''}${pr&&pr.room&&!inRoom()?`<button class=r data-f=jf data-room="${pr.room}">🚪 Join</button>`:''}<button data-f=more data-u="${u}">⋯</button></div>
+   ${MORE===u?`<div class=acts><small>Safety code: <b>${E(f.fp||'…')}</b> (you can compare it with your friend)</small><button data-f=rmf data-u="${u}">Remove</button><button class=red data-f=blk data-u="${u}">Block</button></div>`:''}</div>`}).join('');
+  return h}
+ function invHTML(){INV=INV.filter(i=>Date.now()-i.ts<600000);return INV.map(i=>{const f=D.friends[i.u]||{n:i.u,e:'🙂'};return `<div class=fr style="background:#fff7cc"><div class=top><b>🎮 ${E(f.e)} ${E(f.n)}</b><small>invited you to ${E(gname(i.game))}</small></div><div class=acts><button class=r data-f=jf data-room="${i.room}" data-u="${i.u}">Join</button><button data-f=dinv data-u="${i.u}">Dismiss</button></div></div>`}).join('')}
+ function chatHTML(){const f=D.friends[CHATU];if(!f)return'<small>This friend is gone.</small>';const on=!!LIVE[CHATU];
+  return `<div class=fr><div class=top><button data-f=view data-v=friends>←</button><span class="dot ${on?'on':''}"></span><b>${E(f.e)} ${E(f.n)}</b><small id=fst>${E(status(CHATU))}</small></div>
+  <div class=acts><button data-f=call data-u="${CHATU}" data-m=voice ${on?'':'disabled'}>📞 Voice</button><button data-f=call data-u="${CHATU}" data-m=video ${on?'':'disabled'}>📹 Video</button>${inRoom()?`<button data-f=invite data-u="${CHATU}" ${on?'':'disabled'}>🎮 Invite</button>`:''}</div></div>
+  <div id=fml></div><small id=ferr></small><div class=row><input id=fmi maxlength=500 placeholder="Message @${CHATU}" autocomplete=off><button class=r data-f=send>Send</button></div>
+  <small>${on?'':'They’re offline. Your message will be sent when you’re both online. '}Only friends can message you.</small>`}
+ function msgsHTML(){return thread(CHATU).map(m=>m.sys?`<div class="mb sys">${E(m.x)}</div>`:`<div class="mb ${m.me?'me':''}">${E(m.x)}<small>${new Date(m.ts).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}${m.me?(m.st===2?' · ✓✓ delivered':m.st===1?' · ✓ sent':' · 🕓 waiting'):''}</small></div>`).join('')||'<small>No messages yet. Say hi!</small>'}
+ function acctHTML(){return `<div class=fr><div class=top><b>@${ACC.u}</b><small>Your friends see you as ${E(profile().e)} ${E(profile().n)} (set on the sign-in screen)</small></div></div>
+  <label><input type=checkbox data-f=set data-k=room ${D.set.room?'checked':''} style="width:auto"> Let friends see which room I’m in, so they can join me</label>
+  <label><input type=checkbox data-f=set data-k=bell ${D.set.bell?'checked':''} style="width:auto"> 🔔 Sound, vibration and system alerts for messages, calls and invites</label>
+  <div class=lab>Backup</div><small>Use this to sign in on another device. Keep it safe: you still need your password to open it.</small><button data-f=export>Show my backup code</button><textarea id=fexp hidden readonly></textarea>
+  <div class=row><button data-f=logout>Log out</button><button class=red data-f=del>Delete account</button></div><small id=ferr></small>
+  <small>${D.blocked&&Object.keys(D.blocked).length?'Blocked: '+Object.keys(D.blocked).map(u=>`@${u} <button data-f=unblk data-u="${u}">Unblock</button>`).join(' '):'You haven’t blocked anyone.'}</small>`}
+ function showView(v,u){VIEW=ACC?v:'auth';if(u!==undefined)CHATU=u;MORE='';const b=$f('#fbd');if(!b)return;
+  b.innerHTML=VIEW==='auth'?authHTML():VIEW==='friends'?friendsHTML():VIEW==='chat'?chatHTML():acctHTML();
+  if(VIEW==='chat'){D.unread[CHATU]=0;saveSoon()}tabs();refresh()}
+ function refresh(){
+  setBadge();if(!OPEN||!ACC)return;
+  if(VIEW==='friends'){const l=$f('#flist'),i=$f('#finv');if(l)l.innerHTML=listHTML();if(i)i.innerHTML=invHTML()}
+  else if(VIEW==='chat'){const m=$f('#fml');if(m){m.innerHTML=msgsHTML();m.scrollTop=m.scrollHeight}const s=$f('#fst');if(s)s.textContent=status(CHATU);if(D.unread[CHATU]){D.unread[CHATU]=0;saveSoon();setBadge()}}}
+ function refreshAll(){setBadge();if(OPEN)showView(VIEW)}
+ function openPanel(v,u){OPEN=true;$f('#fp').hidden=false;$f('#fnt').hidden=true;showView(ACC?(v||'friends'):'auth',u)}
+ function closePanel(){OPEN=false;$f('#fp').hidden=true}
+ const setErr=m=>{const e=$f('#ferr');if(e)e.textContent=m||''};
+ // ---- clicks ----
+ const val=id=>{const e=$f('#'+id);return e?e.value:''};
+ root.addEventListener('click',async e=>{
+  const t=e.target.closest&&e.target.closest('[data-f]');if(!t){if(e.target.id==='fnt'){}return}
+  const a=t.dataset.f,u=t.dataset.u;
+  try{
+   if(a==='open')openPanel(ACC?'friends':'auth');else if(a==='close')closePanel();
+   else if(a==='view')showView(t.dataset.v,t.dataset.v==='chat'?CHATU:undefined);
+   else if(a==='authtab'){AUTHTAB=t.dataset.t;showView('auth')}
+   else if(a==='pick'){const x=$f('#fau');if(x)x.value=u;const p=$f('#fap');if(p)p.focus()}
+   else if(a==='login'){setErr('Logging in…');await loginAcct(uname(val('fau')),val('fap'),!!($f('#fkeep')&&$f('#fkeep').checked));afterLogin()}
+   else if(a==='create'){setErr('Creating your account…');await createAcct(uname(val('fau')),val('fap'),val('fap2'),!!($f('#fkeep')&&$f('#fkeep').checked));afterLogin()}
+   else if(a==='import'){const u2=importAcct(val('fimp'));AUTHTAB='in';showView('auth');const x=$f('#fau');if(x)x.value=u2;setErr('Imported @'+u2+'. Now type its password to log in.')}
+   else if(a==='addf'){const r=requestFriend(val('fadd'));const x=$f('#fadd');if(x)x.value='';setErr(r==='accepted'?'Friends!':'Request sent. They need the site open to receive it. It keeps retrying while this page is open.')}
+   else if(a==='link'){const link=location.origin+location.pathname+'?add='+ACC.u;try{await navigator.clipboard.writeText(link);setErr('Invite link copied. Anyone with it can send you a friend request.')}catch(x){setErr(link)}}
+   else if(a==='acc')acceptReq(u);else if(a==='dec')declineReq(u);else if(a==='cnl')cancelReq(u);
+   else if(a==='chat')showView('chat',u);
+   else if(a==='send'){const i=$f('#fmi');if(i&&sendDM(CHATU,i.value)){i.value='';i.focus()}}
+   else if(a==='call')await startCall(u,t.dataset.m);else if(a==='cacc')await acceptCall(t.dataset.m);else if(a==='chang')endCall(true,CALL&&CALL.st==='live'?'ended':'declined');
+   else if(a==='cmute'&&CALL&&CALL.stream){const tr=CALL.stream.getAudioTracks();tr.forEach(x=>{x.enabled=!x.enabled});t.textContent=tr[0]&&tr[0].enabled?'🎤 Mute':'🔇 Unmute'}
+   else if(a==='ccam'&&CALL&&CALL.stream){const tr=CALL.stream.getVideoTracks();tr.forEach(x=>{x.enabled=!x.enabled});t.textContent=tr[0]&&tr[0].enabled?'📹 Camera off':'📹 Camera on'}
+   else if(a==='invite'){inviteFriend(u);setErr('Invite sent to @'+u+'.')}
+   else if(a==='jf'){const code=t.dataset.room;if(inRoom()){if(!confirm('Leave your current room and join '+(code==='OPEN'?'the open room':'room '+code)+'? If you’re hosting a private room, it ends for everyone.'))return}INV=INV.filter(i=>i.u!==u);joinRoom(code)}
+   else if(a==='dinv'){INV=INV.filter(i=>i.u!==u);refresh()}
+   else if(a==='more'){MORE=MORE===u?'':u;refresh()}
+   else if(a==='rmf'){if(confirm('Remove @'+u+' from your friends?'))removeFriend(u)}
+   else if(a==='blk'){if(confirm('Block @'+u+'? They can’t find you or message you.'))blockUser(u)}
+   else if(a==='unblk'){delete D.blocked[u];saveSoon();showView('acct')}
+   else if(a==='set'){D.set[t.dataset.k]=t.checked?1:0;saveSoon();if(t.dataset.k==='room')broadcastPresence();if(t.dataset.k==='bell'&&t.checked){beep();try{window.Notification&&Notification.permission==='default'&&Notification.requestPermission()}catch(x){}}}
+   else if(a==='export'){const x=$f('#fexp');x.value=exportAcct();x.hidden=false;x.focus();x.select()}
+   else if(a==='logout')logout('');
+   else if(a==='del'){if(confirm('Delete @'+ACC.u+' from this device? Your friends and messages here will be lost unless you made a backup.'))deleteAcct()}
+  }catch(err){setErr(err&&err.message||'Something went wrong.')}});
+ root.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const id=e.target.id;
+  try{if(id==='fmi'){const i=e.target;if(sendDM(CHATU,i.value))i.value=''}else if(id==='fadd'){const r=requestFriend(e.target.value);e.target.value='';setErr(r==='accepted'?'Friends!':'Request sent.')}else if(id==='fap'||id==='fap2'){const b=root.querySelector('[data-f=login],[data-f=create]');if(b)b.click()}}catch(err){setErr(err.message)}});
+ $f('#fnt').addEventListener('click',()=>{const t=$f('#fnt');t.hidden=true;if(t._a)t._a()});
+ function afterLogin(){showView('friends');if(ADD){const x=$f('#fadd');if(x)x.value=ADD.add||'';ADD=null}}
+ // ---- timers ----
+ function tick(){if(!ACC||!P)return;
+  const want=new Set(Object.keys(D.friends).concat(D.outReq.map(r=>r.u),Object.keys(D.pendAcc)));const us=[...want].filter(u=>!(LIVE[u]&&LIVE[u].c&&LIVE[u].c.open));
+  const n=us.length;for(let i=0;i<Math.min(8,n);i++){connectFriend(us[(RRP+i)%n])}RRP+=8;
+  INV=INV.filter(i=>Date.now()-i.ts<600000)}
+ function startTimers(){stopTimers();TICKT=setInterval(()=>{try{tick()}catch(e){}},CFG.tick);PRET=setInterval(()=>{try{if(!ACC)return;const s=inRoom()?S.c+'|'+(S.g||'')+'|'+D.set.room:'';if(s!==PRESIG){PRESIG=s;broadcastPresence()}}catch(e){}},2000)}
+ function stopTimers(){clearInterval(TICKT);clearInterval(PRET);TICKT=PRET=0}
+ document.addEventListener('visibilitychange',()=>{try{if(!document.hidden&&ACC)tick()}catch(e){}});
+ window.addEventListener&&window.addEventListener('beforeunload',()=>{try{flush()}catch(e){}});
+ // ---- start up ----
+ try{const q=new URLSearchParams(location.search).get('add');if(q&&okName(uname(q)))ADD={add:uname(q)}}catch(e){}
+ tabs();setBadge();
+ autoLogin().then(()=>{if(ADD&&ACC){openPanel('friends');afterLogin()}else if(ADD&&!ACC){AUTHTAB='in';openPanel('auth')}});
+ window.FRD={CFG,create:createAcct,login:loginAcct,logout,add:requestFriend,accept:acceptReq,decline:declineReq,cancel:cancelReq,dm:sendDM,call:startCall,answer:acceptCall,hang:()=>endCall(true,CALL&&CALL.st==='live'?'ended':'declined'),invite:inviteFriend,remove:removeFriend,block:blockUser,tick,flush,view:showView,open:openPanel,exportAcct,importAcct,
+  state:()=>({u:ACC&&ACC.u,friends:D?Object.keys(D.friends):[],live:Object.keys(LIVE),inReq:D?D.inReq.map(r=>r.u):[],outReq:D?D.outReq.map(r=>r.u):[],call:CALL&&{st:CALL.st,dir:CALL.dir,u:CALL.u},inv:INV.map(i=>i.u+':'+i.room),unread:D&&D.unread,thread:u=>D?thread(u):[],fp:u=>D&&D.friends[u]&&D.friends[u].fp,pr:u=>LIVE[u]&&LIVE[u].pr,box:ACC&&lsGet('hopdata:'+ACC.u),view:VIEW})};
 }catch(e){}})();
 </script>
 
